@@ -1,0 +1,59 @@
+@page
+@model SiNan.Console.Pages.Services.DetailsModel
+@{
+    ViewData["Title"] = "Service Instances";
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Registry</p>
+        <h1>@Model.ServiceName 实例</h1>
+        <p class="muted">Namespace: @Model.Namespace / Group: @Model.Group</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-page="/Services/Index">返回服务列表</a>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <div class="panel-title">实例</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>实例 ID</th>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Weight</th>
+                    <th>Healthy</th>
+                    <th>TTL</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Instances.Count == 0)
+            {
+                <tr>
+                    <td colspan="6" class="text-muted">暂无实例</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var instance in Model.Instances)
+                {
+                    <tr>
+                        <td class="fw-semibold">@instance.InstanceId</td>
+                        <td>@instance.Host</td>
+                        <td>@instance.Port</td>
+                        <td>@instance.Weight</td>
+                        <td>@(instance.Healthy ? "Healthy" : "Unhealthy")</td>
+                        <td>@instance.TtlSeconds</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,10 +1,42 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Overview";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <div>
+        <p class="eyebrow">SiNan Console</p>
+        <h1>注册与配置的可视化入口</h1>
+        <p class="muted">面向日常运维与研发协作的轻量控制台，聚焦服务发现与配置变更。</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" asp-page="/Services/Index">查看服务</a>
+            <a class="btn btn-outline-light" asp-page="/Configs/Index">浏览配置</a>
+        </div>
+    </div>
+    <div class="hero-card">
+        <div class="hero-card-title">快速入口</div>
+        <ul>
+            <li>服务列表与实例状态</li>
+            <li>配置版本与历史回溯</li>
+            <li>支持 namespace / group 筛选</li>
+        </ul>
+    </div>
+</section>
+
+<section class="grid-cards">
+    <article class="panel card">
+        <h3>服务视图</h3>
+        <p>按命名空间与分组筛选，查看实例与健康状态。</p>
+        <a class="link" asp-page="/Services/Index">进入服务</a>
+    </article>
+    <article class="panel card">
+        <h3>配置中心</h3>
+        <p>浏览配置项、版本变更与发布记录。</p>
+        <a class="link" asp-page="/Configs/Index">进入配置</a>
+    </article>
+    <article class="panel card">
+        <h3>运行说明</h3>
+        <p>需要先启动 SiNan.Server，控制台会自动拉取数据。</p>
+    </article>
+</section>

@@ -42,6 +42,9 @@ Request body is the same as create. The server increments the version and stores
 ## Get config
 GET /?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
 
+## List configs
+GET /list?namespace=default&group=DEFAULT_GROUP
+
 ## Delete config
 DELETE /?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
 

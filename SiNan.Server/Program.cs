@@ -328,6 +328,45 @@ registryGroup.MapGet("/subscribe", async (
     .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
     .WithOpenApi();
 
+registryGroup.MapGet("/services", async (
+    string? @namespace,
+    string? group,
+    SiNanDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    var query = dbContext.Services.AsNoTracking();
+
+    if (!string.IsNullOrWhiteSpace(@namespace))
+    {
+        query = query.Where(service => service.Namespace == @namespace);
+    }
+
+    if (!string.IsNullOrWhiteSpace(group))
+    {
+        query = query.Where(service => service.Group == group);
+    }
+
+    var items = await query
+        .Select(service => new ServiceSummaryResponse
+        {
+            Namespace = service.Namespace,
+            Group = service.Group,
+            ServiceName = service.Name,
+            InstanceCount = service.Instances.Count,
+            HealthyInstanceCount = service.Instances.Count(instance => instance.Healthy),
+            UpdatedAt = service.UpdatedAt
+        })
+        .OrderBy(item => item.Namespace)
+        .ThenBy(item => item.Group)
+        .ThenBy(item => item.ServiceName)
+        .ToListAsync(cancellationToken);
+
+    return Results.Ok(items);
+})
+    .WithName("RegistryServices")
+    .Produces<List<ServiceSummaryResponse>>(StatusCodes.Status200OK)
+    .WithOpenApi();
+
 configGroup.MapPost("/", async (
     ConfigUpsertRequest request,
     IConfigRepository configRepository,
@@ -556,6 +595,46 @@ configGroup.MapGet("/history", async (
     .Produces<List<ConfigHistoryResponse>>(StatusCodes.Status200OK)
     .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
     .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+configGroup.MapGet("/list", async (
+    string? @namespace,
+    string? group,
+    SiNanDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    IQueryable<ConfigItemEntity> query = dbContext.ConfigItems.AsNoTracking();
+
+    if (!string.IsNullOrWhiteSpace(@namespace))
+    {
+        query = query.Where(item => item.Namespace == @namespace);
+    }
+
+    if (!string.IsNullOrWhiteSpace(group))
+    {
+        query = query.Where(item => item.Group == group);
+    }
+
+    var items = await query
+        .OrderBy(item => item.Namespace)
+        .ThenBy(item => item.Group)
+        .ThenBy(item => item.Key)
+        .Select(item => new ConfigListItemResponse
+        {
+            Namespace = item.Namespace,
+            Group = item.Group,
+            Key = item.Key,
+            ContentType = item.ContentType,
+            Version = item.Version,
+            PublishedAt = item.PublishedAt,
+            UpdatedAt = item.UpdatedAt
+        })
+        .ToListAsync(cancellationToken);
+
+    return Results.Ok(items);
+})
+    .WithName("ConfigList")
+    .Produces<List<ConfigListItemResponse>>(StatusCodes.Status200OK)
     .WithOpenApi();
 
 configGroup.MapGet("/subscribe", async (

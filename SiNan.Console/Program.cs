@@ -4,6 +4,11 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient("SiNanServer", client =>
+{
+    var baseUrl = builder.Configuration["SiNanServer:BaseUrl"] ?? "http://localhost:5043";
+    client.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
+});
 
 var app = builder.Build();
 

@@ -1,0 +1,81 @@
+@page
+@model SiNan.Console.Pages.Configs.DetailsModel
+@{
+    ViewData["Title"] = "Config Details";
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Config</p>
+        <h1>@Model.Key</h1>
+        <p class="muted">Namespace: @Model.Namespace / Group: @Model.Group</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-page="/Configs/Index">返回配置列表</a>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+@if (Model.Item is not null)
+{
+    <div class="panel">
+        <div class="panel-title">当前配置</div>
+        <div class="kv-grid">
+            <div>
+                <span class="label">ContentType</span>
+                <div class="value">@Model.Item.ContentType</div>
+            </div>
+            <div>
+                <span class="label">Version</span>
+                <div class="value">@Model.Item.Version</div>
+            </div>
+            <div>
+                <span class="label">PublishedAt</span>
+                <div class="value">@(Model.Item.PublishedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") ?? "-")</div>
+            </div>
+            <div>
+                <span class="label">PublishedBy</span>
+                <div class="value">@(Model.Item.PublishedBy ?? "-")</div>
+            </div>
+        </div>
+        <div class="config-content">
+            <pre>@Model.Item.Content</pre>
+        </div>
+    </div>
+}
+
+<div class="panel">
+    <div class="panel-title">版本历史</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>PublishedAt</th>
+                    <th>PublishedBy</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.History.Count == 0)
+            {
+                <tr>
+                    <td colspan="3" class="text-muted">暂无历史</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.History)
+                {
+                    <tr>
+                        <td>@item.Version</td>
+                        <td>@item.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@(item.PublishedBy ?? "-")</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

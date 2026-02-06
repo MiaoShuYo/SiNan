@@ -1,0 +1,73 @@
+@page
+@model SiNan.Console.Pages.Configs.IndexModel
+@{
+    ViewData["Title"] = "Configs";
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Config</p>
+        <h1>配置列表</h1>
+        <p class="muted">查看配置项和版本号，点击查看详情。</p>
+    </div>
+    <form method="get" class="filter-form">
+        <div>
+            <label class="form-label">Namespace</label>
+            <input class="form-control" name="namespace" value="@Model.Namespace" placeholder="default" />
+        </div>
+        <div>
+            <label class="form-label">Group</label>
+            <input class="form-control" name="group" value="@Model.Group" placeholder="DEFAULT_GROUP" />
+        </div>
+        <button class="btn btn-primary" type="submit">查询</button>
+    </form>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <div class="panel-title">配置项</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Namespace</th>
+                    <th>Group</th>
+                    <th>ContentType</th>
+                    <th>Version</th>
+                    <th>更新时间</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Configs.Count == 0)
+            {
+                <tr>
+                    <td colspan="7" class="text-muted">暂无配置</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.Configs)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.Key</td>
+                        <td>@item.Namespace</td>
+                        <td>@item.Group</td>
+                        <td>@item.ContentType</td>
+                        <td>@item.Version</td>
+                        <td>@item.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/Configs/Details" asp-route-namespace="@item.Namespace" asp-route-group="@item.Group" asp-route-key="@item.Key">详情</a>
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

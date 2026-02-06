@@ -75,6 +75,28 @@ Notes:
 - Returns `ETag` header for cache validation.
 - Send `If-None-Match` with the last `ETag` to receive `304 Not Modified`.
 
+## List services
+GET /services
+
+Query parameters:
+- namespace (optional)
+- group (optional)
+
+Response:
+
+```json
+[
+  {
+    "namespace": "default",
+    "group": "DEFAULT_GROUP",
+    "serviceName": "orders",
+    "instanceCount": 2,
+    "healthyInstanceCount": 2,
+    "updatedAt": "2026-02-07T01:20:00Z"
+  }
+]
+```
+
 ## Subscribe (long-poll)
 GET /subscribe
 

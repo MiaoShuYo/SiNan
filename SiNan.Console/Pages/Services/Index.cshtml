@@ -1,0 +1,73 @@
+@page
+@model SiNan.Console.Pages.Services.IndexModel
+@{
+    ViewData["Title"] = "Services";
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Registry</p>
+        <h1>服务列表</h1>
+        <p class="muted">按命名空间与分组筛选服务，点击查看实例。</p>
+    </div>
+    <form method="get" class="filter-form">
+        <div>
+            <label class="form-label">Namespace</label>
+            <input class="form-control" name="namespace" value="@Model.Namespace" placeholder="default" />
+        </div>
+        <div>
+            <label class="form-label">Group</label>
+            <input class="form-control" name="group" value="@Model.Group" placeholder="DEFAULT_GROUP" />
+        </div>
+        <button class="btn btn-primary" type="submit">查询</button>
+    </form>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <div class="panel-title">服务</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>服务名</th>
+                    <th>Namespace</th>
+                    <th>Group</th>
+                    <th>实例</th>
+                    <th>健康</th>
+                    <th>更新时间</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Services.Count == 0)
+            {
+                <tr>
+                    <td colspan="7" class="text-muted">暂无服务</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var service in Model.Services)
+                {
+                    <tr>
+                        <td class="fw-semibold">@service.ServiceName</td>
+                        <td>@service.Namespace</td>
+                        <td>@service.Group</td>
+                        <td>@service.InstanceCount</td>
+                        <td>@service.HealthyInstanceCount</td>
+                        <td>@service.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/Services/Details" asp-route-namespace="@service.Namespace" asp-route-group="@service.Group" asp-route-serviceName="@service.ServiceName">实例</a>
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
