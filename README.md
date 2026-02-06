@@ -47,6 +47,9 @@ RBAC filters:
 - `AllowedActions` restricts operations (e.g. `config.create`, `config.update`, `config.delete`, `config.rollback`, `config.read`, `config.history`, `registry.register`, `registry.deregister`, `registry.heartbeat`, `registry.read`, `audit.read`).
 - `AllowedResources` uses prefix matching (e.g. `config:default/DEFAULT_GROUP/` or `registry:default/DEFAULT_GROUP/orders`).
 
+Audit example:
+- For audit queries set `AllowedActions` to include `audit.read` and `AllowedResources` to include `audit:logs`.
+
 Middleware behavior:
 - When auth is enabled, write requests (`POST/PUT/PATCH/DELETE`) and `/api/v1/audit` require `X-SiNan-Token`.
 - Action-level checks still run inside handlers for namespace/group and action/resource rules.
@@ -56,6 +59,7 @@ Middleware behavior:
 - See requirements.md for detailed product requirements.
 - Registry API reference: docs/registry-api.md
 - Config API reference: docs/config-api.md
+- Audit API reference: docs/audit-api.md
 - HA/load test plan: docs/ha-load-test-plan.md
 
 ## Quotas (optional)
