@@ -81,7 +81,8 @@ registryGroup.MapPost("/register", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid register request.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    var registerResource = $"registry:{request.Namespace}/{request.Group}/{request.ServiceName}/{request.Host}:{request.Port}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "registry.register", registerResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -208,7 +209,8 @@ registryGroup.MapPost("/deregister", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid deregister request.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    var deregisterResource = $"registry:{request.Namespace}/{request.Group}/{request.ServiceName}/{request.Host}:{request.Port}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "registry.deregister", deregisterResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -272,7 +274,8 @@ registryGroup.MapPost("/heartbeat", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid heartbeat request.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    var heartbeatResource = $"registry:{request.Namespace}/{request.Group}/{request.ServiceName}/{request.Host}:{request.Port}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "registry.heartbeat", heartbeatResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -462,7 +465,8 @@ configGroup.MapPost("/", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid config request.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    var configResource = $"config:{request.Namespace}/{request.Group}/{request.Key}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "config.create", configResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -546,7 +550,8 @@ configGroup.MapPut("/", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid config request.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    var configResource = $"config:{request.Namespace}/{request.Group}/{request.Key}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "config.update", configResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -670,7 +675,8 @@ configGroup.MapDelete("/", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var authResult = authService.AuthorizeNamespaceGroup(httpContext, @namespace, group);
+    var configResource = $"config:{@namespace}/{group}/{key}";
+    var authResult = authService.AuthorizeAction(httpContext, @namespace, group, "config.delete", configResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -743,6 +749,117 @@ configGroup.MapGet("/history", async (
     .WithName("ConfigHistory")
     .Produces<List<ConfigHistoryResponse>>(StatusCodes.Status200OK)
     .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+configGroup.MapPost("/rollback", async (
+    string @namespace,
+    string group,
+    string key,
+    int version,
+    string? publishedBy,
+    IConfigRepository configRepository,
+    IUnitOfWork unitOfWork,
+    ConfigChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
+    AuditLogWriter auditLogWriter,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    if (errors.Count > 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    if (version <= 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Version must be greater than 0.", StatusCodes.Status400BadRequest);
+    }
+
+    var configResource = $"config:{@namespace}/{group}/{key}";
+    var authResult = authService.AuthorizeAction(httpContext, @namespace, group, "config.rollback", configResource);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
+    }
+
+    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    if (config is null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    var history = await configRepository.GetHistoryAsync(config.Id, cancellationToken);
+    var target = history.FirstOrDefault(item => item.Version == version);
+    if (target is null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigHistoryNotFound, "Config history not found.", StatusCodes.Status404NotFound);
+    }
+
+    var beforeConfig = new
+    {
+        config.Namespace,
+        config.Group,
+        config.Key,
+        config.ContentType,
+        config.Version
+    };
+
+    var now = DateTimeOffset.UtcNow;
+    var newVersion = config.Version + 1;
+    var updated = new ConfigItemEntity
+    {
+        Id = config.Id,
+        Namespace = config.Namespace,
+        Group = config.Group,
+        Key = config.Key,
+        Content = target.Content,
+        ContentType = target.ContentType,
+        Version = newVersion,
+        PublishedAt = now,
+        PublishedBy = publishedBy,
+        CreatedAt = config.CreatedAt,
+        UpdatedAt = now
+    };
+
+    await configRepository.UpdateConfigAsync(updated, cancellationToken);
+    await configRepository.AddHistoryAsync(new ConfigHistoryEntity
+    {
+        Id = Guid.NewGuid(),
+        ConfigId = updated.Id,
+        Version = newVersion,
+        Content = updated.Content,
+        ContentType = updated.ContentType,
+        PublishedAt = now,
+        PublishedBy = updated.PublishedBy,
+        CreatedAt = now
+    }, cancellationToken);
+
+    await unitOfWork.SaveChangesAsync(cancellationToken);
+
+    notifier.Notify(BuildConfigKey(updated.Namespace, updated.Group, updated.Key));
+    ConfigMetrics.RecordChange();
+
+    var actor = authResult.Actor;
+    var auditResource = $"config:{updated.Namespace}/{updated.Group}/{updated.Key}";
+    var afterConfig = new
+    {
+        updated.Namespace,
+        updated.Group,
+        updated.Key,
+        updated.ContentType,
+        updated.Version
+    };
+    await auditLogWriter.AddAsync(actor, "config.rollback", auditResource, beforeConfig, afterConfig, httpContext.TraceIdentifier, cancellationToken);
+
+    return Results.Ok(ToConfigItemResponse(updated));
+})
+    .WithName("ConfigRollback")
+    .Produces<ConfigItemResponse>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status401Unauthorized)
+    .Produces<ErrorResponse>(StatusCodes.Status403Forbidden)
     .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
     .WithOpenApi();
 

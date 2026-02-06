@@ -48,6 +48,9 @@ GET /list?namespace=default&group=DEFAULT_GROUP
 ## Delete config
 DELETE /?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
 
+## Rollback config
+POST /rollback?namespace=default&group=DEFAULT_GROUP&key=orders.timeout&version=1
+
 ## List history
 GET /history?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
 

@@ -1,29 +1,58 @@
 using System.Net;
+using Microsoft.Extensions.Options;
 
 namespace SiNan.SDK.Config;
 
 public sealed class SiNanConfigClient : ISiNanConfigClient
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IOptions<SiNanClientOptions> _options;
 
-    public SiNanConfigClient(IHttpClientFactory httpClientFactory)
+    public SiNanConfigClient(IHttpClientFactory httpClientFactory, IOptions<SiNanClientOptions> options)
     {
         _httpClientFactory = httpClientFactory;
+        _options = options;
     }
 
     public async Task<ConfigItemResponse> CreateAsync(ConfigUpsertRequest request, CancellationToken cancellationToken = default)
     {
         var client = _httpClientFactory.CreateClient("SiNan");
-        var response = await HttpJson.PostAsync(client, "/api/v1/configs", request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () => new HttpRequestMessage(HttpMethod.Post, "/api/v1/configs")
+            {
+                Content = HttpJson.CreateJsonContent(request)
+            },
+            options,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
+
         return (await HttpJson.ReadAsync<ConfigItemResponse>(response.Content, cancellationToken))!;
     }
 
     public async Task<ConfigItemResponse> UpdateAsync(ConfigUpsertRequest request, CancellationToken cancellationToken = default)
     {
         var client = _httpClientFactory.CreateClient("SiNan");
-        var response = await HttpJson.PutAsync(client, "/api/v1/configs", request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () => new HttpRequestMessage(HttpMethod.Put, "/api/v1/configs")
+            {
+                Content = HttpJson.CreateJsonContent(request)
+            },
+            options,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
+
         return (await HttpJson.ReadAsync<ConfigItemResponse>(response.Content, cancellationToken))!;
     }
 
@@ -31,8 +60,18 @@ public sealed class SiNanConfigClient : ISiNanConfigClient
     {
         var url = $"/api/v1/configs?namespace={Uri.EscapeDataString(@namespace)}&group={Uri.EscapeDataString(group)}&key={Uri.EscapeDataString(key)}";
         var client = _httpClientFactory.CreateClient("SiNan");
-        var response = await client.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () => new HttpRequestMessage(HttpMethod.Get, url),
+            options,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
+
         return (await HttpJson.ReadAsync<ConfigItemResponse>(response.Content, cancellationToken))!;
     }
 
@@ -40,16 +79,35 @@ public sealed class SiNanConfigClient : ISiNanConfigClient
     {
         var url = $"/api/v1/configs?namespace={Uri.EscapeDataString(@namespace)}&group={Uri.EscapeDataString(group)}&key={Uri.EscapeDataString(key)}";
         var client = _httpClientFactory.CreateClient("SiNan");
-        var response = await client.DeleteAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () => new HttpRequestMessage(HttpMethod.Delete, url),
+            options,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
     }
 
     public async Task<List<ConfigHistoryItemResponse>> GetHistoryAsync(string @namespace, string group, string key, CancellationToken cancellationToken = default)
     {
         var url = $"/api/v1/configs/history?namespace={Uri.EscapeDataString(@namespace)}&group={Uri.EscapeDataString(group)}&key={Uri.EscapeDataString(key)}";
         var client = _httpClientFactory.CreateClient("SiNan");
-        var response = await client.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () => new HttpRequestMessage(HttpMethod.Get, url),
+            options,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
+
         var data = await HttpJson.ReadAsync<List<ConfigHistoryItemResponse>>(response.Content, cancellationToken);
         return data ?? new List<ConfigHistoryItemResponse>();
     }
@@ -75,7 +133,21 @@ public sealed class SiNanConfigClient : ISiNanConfigClient
         }
 
         var client = _httpClientFactory.CreateClient("SiNan");
-        var response = await client.SendAsync(request, cancellationToken);
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () =>
+            {
+                var retryRequest = new HttpRequestMessage(HttpMethod.Get, request.RequestUri!);
+                if (!string.IsNullOrWhiteSpace(etag))
+                {
+                    retryRequest.Headers.TryAddWithoutValidation("If-None-Match", etag);
+                }
+
+                return retryRequest;
+            },
+            options,
+            cancellationToken);
         var responseEtag = response.Headers.ETag?.Tag;
 
         if (response.StatusCode == HttpStatusCode.NotModified)
@@ -83,7 +155,10 @@ public sealed class SiNanConfigClient : ISiNanConfigClient
             return new ApiResult<ConfigItemResponse>(response.StatusCode, null, responseEtag, true);
         }
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
         var payload = await HttpJson.ReadAsync<ConfigItemResponse>(response.Content, cancellationToken);
         return new ApiResult<ConfigItemResponse>(response.StatusCode, payload, responseEtag, false);
     }

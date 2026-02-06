@@ -47,6 +47,34 @@
 }
 
 <div class="panel">
+    <div class="panel-title">编辑与发布</div>
+    <form method="post" asp-page-handler="Update" class="config-form">
+        <input type="hidden" name="namespace" value="@Model.Namespace" />
+        <input type="hidden" name="group" value="@Model.Group" />
+        <input type="hidden" name="key" value="@Model.Key" />
+        <div class="form-grid">
+            <div>
+                <label class="form-label">Token</label>
+                <input class="form-control" name="token" value="@Model.Token" placeholder="X-SiNan-Token" />
+            </div>
+            <div>
+                <label class="form-label">PublishedBy</label>
+                <input class="form-control" name="publishedBy" value="@Model.PublishedBy" placeholder="operator" />
+            </div>
+            <div>
+                <label class="form-label">ContentType</label>
+                <input class="form-control" name="contentType" value="@Model.ContentType" placeholder="text/plain" />
+            </div>
+        </div>
+        <div>
+            <label class="form-label">Content</label>
+            <textarea class="form-control" name="content" rows="8">@Model.Content</textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">发布更新</button>
+    </form>
+</div>
+
+<div class="panel">
     <div class="panel-title">版本历史</div>
     <div class="table-responsive">
         <table class="table table-hover align-middle">
@@ -55,6 +83,7 @@
                     <th>Version</th>
                     <th>PublishedAt</th>
                     <th>PublishedBy</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -72,6 +101,17 @@
                         <td>@item.Version</td>
                         <td>@item.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
                         <td>@(item.PublishedBy ?? "-")</td>
+                        <td>
+                            <form method="post" asp-page-handler="Rollback" class="inline-form">
+                                <input type="hidden" name="namespace" value="@Model.Namespace" />
+                                <input type="hidden" name="group" value="@Model.Group" />
+                                <input type="hidden" name="key" value="@Model.Key" />
+                                <input type="hidden" name="version" value="@item.Version" />
+                                <input type="hidden" name="token" value="@Model.Token" />
+                                <input type="hidden" name="publishedBy" value="@Model.PublishedBy" />
+                                <button class="btn btn-sm btn-outline-primary" type="submit">回滚</button>
+                            </form>
+                        </td>
                     </tr>
                 }
             }

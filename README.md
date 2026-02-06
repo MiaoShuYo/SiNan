@@ -43,6 +43,10 @@ Send the token via `X-SiNan-Token` header. Optional actor header: `X-SiNan-Actor
 
 Admin keys set `IsAdmin=true` and can access audit query endpoint: `GET /api/v1/audit?take=100`.
 
+RBAC filters:
+- `AllowedActions` restricts operations (e.g. `config.create`, `config.update`, `config.delete`, `config.rollback`, `registry.register`, `registry.deregister`, `registry.heartbeat`).
+- `AllowedResources` uses prefix matching (e.g. `config:default/DEFAULT_GROUP/` or `registry:default/DEFAULT_GROUP/orders`).
+
 ## Notes
 - Database support targets MySQL and SQLite. SQLite will be used for local/dev; MySQL for production.
 - See requirements.md for detailed product requirements.
@@ -60,6 +64,8 @@ var services = new ServiceCollection();
 services.AddSiNanClients(options =>
 {
 	options.BaseUrl = "http://localhost:5043";
+	options.RetryCount = 2;
+	options.RetryDelayMs = 200;
 });
 
 var provider = services.BuildServiceProvider();

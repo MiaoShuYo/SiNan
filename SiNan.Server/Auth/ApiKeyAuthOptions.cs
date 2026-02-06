@@ -17,4 +17,6 @@ public sealed class ApiKeyDefinition
     public bool IsAdmin { get; set; }
     public List<string> Namespaces { get; set; } = new();
     public List<string> Groups { get; set; } = new();
+    public List<string> AllowedActions { get; set; } = new();
+    public List<string> AllowedResources { get; set; } = new();
 }

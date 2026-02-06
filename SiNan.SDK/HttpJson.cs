@@ -10,6 +10,11 @@ internal static class HttpJson
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    public static HttpContent CreateJsonContent<T>(T payload)
+    {
+        return JsonContent.Create(payload, options: Options);
+    }
+
     public static Task<HttpResponseMessage> PostAsync<T>(HttpClient client, string path, T payload, CancellationToken cancellationToken)
     {
         return client.PostAsJsonAsync(path, payload, Options, cancellationToken);
