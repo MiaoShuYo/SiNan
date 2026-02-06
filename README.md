@@ -42,3 +42,32 @@ docker compose --profile sqlite up -d
 - See requirements.md for detailed product requirements.
 - Registry API reference: docs/registry-api.md
 - Config API reference: docs/config-api.md
+
+## .NET SDK (preview)
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using SiNan.SDK;
+using SiNan.SDK.Config;
+using SiNan.SDK.Registry;
+
+var services = new ServiceCollection();
+services.AddSiNanClients(options =>
+{
+	options.BaseUrl = "http://localhost:5043";
+});
+
+var provider = services.BuildServiceProvider();
+var registryClient = provider.GetRequiredService<ISiNanRegistryClient>();
+var configClient = provider.GetRequiredService<ISiNanConfigClient>();
+
+await registryClient.RegisterAsync(new RegisterInstanceRequest
+{
+	Namespace = "default",
+	Group = "DEFAULT_GROUP",
+	ServiceName = "orders",
+	Host = "127.0.0.1",
+	Port = 8080
+});
+
+var config = await configClient.GetAsync("default", "DEFAULT_GROUP", "orders.timeout");
+```
