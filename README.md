@@ -44,7 +44,7 @@ Send the token via `X-SiNan-Token` header. Optional actor header: `X-SiNan-Actor
 Admin keys set `IsAdmin=true` and can access audit query endpoint: `GET /api/v1/audit?take=100`.
 
 RBAC filters:
-- `AllowedActions` restricts operations (e.g. `config.create`, `config.update`, `config.delete`, `config.rollback`, `registry.register`, `registry.deregister`, `registry.heartbeat`).
+- `AllowedActions` restricts operations (e.g. `config.create`, `config.update`, `config.delete`, `config.rollback`, `config.read`, `config.history`, `registry.register`, `registry.deregister`, `registry.heartbeat`, `registry.read`, `audit.read`).
 - `AllowedResources` uses prefix matching (e.g. `config:default/DEFAULT_GROUP/` or `registry:default/DEFAULT_GROUP/orders`).
 
 Middleware behavior:

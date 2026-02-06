@@ -5,6 +5,8 @@ Base path: /api/v1/configs
 ## Create config
 POST /
 
+Requires action: `config.create`
+
 Request body:
 
 ```json
@@ -37,22 +39,57 @@ Response:
 ## Update config (publish new version)
 PUT /
 
+Requires action: `config.update`
+
 Request body is the same as create. The server increments the version and stores history.
 
 ## Get config
 GET /?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
 
+Requires action: `config.read`
+
+Notes:
+- When auth is enabled, read endpoints may be restricted by `config.read` and `config.history` actions.
+
 ## List configs
 GET /list?namespace=default&group=DEFAULT_GROUP
 
 ## Delete config
-DELETE /?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
+DELETE /
+
+Requires action: `config.delete`
+
+Request body:
+
+```json
+{
+  "namespace": "default",
+  "group": "DEFAULT_GROUP",
+  "key": "orders.timeout"
+}
+```
 
 ## Rollback config
-POST /rollback?namespace=default&group=DEFAULT_GROUP&key=orders.timeout&version=1
+POST /rollback
+
+Requires action: `config.rollback`
+
+Request body:
+
+```json
+{
+  "namespace": "default",
+  "group": "DEFAULT_GROUP",
+  "key": "orders.timeout",
+  "version": 1,
+  "publishedBy": "operator"
+}
+```
 
 ## List history
 GET /history?namespace=default&group=DEFAULT_GROUP&key=orders.timeout
+
+Requires action: `config.history`
 
 Response:
 

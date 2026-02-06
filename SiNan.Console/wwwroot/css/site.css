@@ -193,6 +193,12 @@ h1, h2, h3 {
   display: inline;
 }
 
+.action-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .kv-grid .label {
   display: block;
   font-size: 0.8rem;

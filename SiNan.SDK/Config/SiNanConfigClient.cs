@@ -77,12 +77,19 @@ public sealed class SiNanConfigClient : ISiNanConfigClient
 
     public async Task DeleteAsync(string @namespace, string group, string key, CancellationToken cancellationToken = default)
     {
-        var url = $"/api/v1/configs?namespace={Uri.EscapeDataString(@namespace)}&group={Uri.EscapeDataString(group)}&key={Uri.EscapeDataString(key)}";
         var client = _httpClientFactory.CreateClient("SiNan");
         var options = _options.Value;
         var response = await HttpRetry.SendAsync(
             client,
-            () => new HttpRequestMessage(HttpMethod.Delete, url),
+            () => new HttpRequestMessage(HttpMethod.Delete, "/api/v1/configs")
+            {
+                Content = HttpJson.CreateJsonContent(new
+                {
+                    Namespace = @namespace,
+                    Group = group,
+                    Key = key
+                })
+            },
             options,
             cancellationToken);
 
@@ -90,6 +97,34 @@ public sealed class SiNanConfigClient : ISiNanConfigClient
         {
             throw await ApiException.FromResponseAsync(response, cancellationToken);
         }
+    }
+
+    public async Task<ConfigItemResponse> RollbackAsync(string @namespace, string group, string key, int version, string? publishedBy = null, CancellationToken cancellationToken = default)
+    {
+        var client = _httpClientFactory.CreateClient("SiNan");
+        var options = _options.Value;
+        var response = await HttpRetry.SendAsync(
+            client,
+            () => new HttpRequestMessage(HttpMethod.Post, "/api/v1/configs/rollback")
+            {
+                Content = HttpJson.CreateJsonContent(new
+                {
+                    Namespace = @namespace,
+                    Group = group,
+                    Key = key,
+                    Version = version,
+                    PublishedBy = publishedBy
+                })
+            },
+            options,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw await ApiException.FromResponseAsync(response, cancellationToken);
+        }
+
+        return (await HttpJson.ReadAsync<ConfigItemResponse>(response.Content, cancellationToken))!;
     }
 
     public async Task<List<ConfigHistoryItemResponse>> GetHistoryAsync(string @namespace, string group, string key, CancellationToken cancellationToken = default)

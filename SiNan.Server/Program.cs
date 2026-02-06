@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using SiNan.Server.Audit;
 using SiNan.Server.Auth;
@@ -76,6 +77,8 @@ registryGroup.MapPost("/register", async (
     RegistryChangeNotifier notifier,
     ApiKeyAuthorizationService authService,
     AuditLogWriter auditLogWriter,
+    SiNanDbContext dbContext,
+    IOptions<QuotaOptions> quotaOptions,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -99,6 +102,18 @@ registryGroup.MapPost("/register", async (
 
     if (!serviceExists)
     {
+        var maxServices = quotaOptions.Value.MaxServicesPerNamespace;
+        if (maxServices > 0)
+        {
+            var serviceCount = await dbContext.Services
+                .AsNoTracking()
+                .CountAsync(s => s.Namespace == request.Namespace, cancellationToken);
+            if (serviceCount >= maxServices)
+            {
+                return Error(httpContext, ErrorCodes.QuotaExceeded, "Service quota exceeded.", StatusCodes.Status403Forbidden);
+            }
+        }
+
         service = new ServiceEntity
         {
             Id = Guid.NewGuid(),
@@ -137,6 +152,18 @@ registryGroup.MapPost("/register", async (
 
     if (instance is null)
     {
+        var maxInstances = quotaOptions.Value.MaxInstancesPerNamespace;
+        if (maxInstances > 0)
+        {
+            var instanceCount = await dbContext.ServiceInstances
+                .AsNoTracking()
+                .CountAsync(i => i.Service != null && i.Service.Namespace == request.Namespace, cancellationToken);
+            if (instanceCount >= maxInstances)
+            {
+                return Error(httpContext, ErrorCodes.QuotaExceeded, "Instance quota exceeded.", StatusCodes.Status403Forbidden);
+            }
+        }
+
         instance = new ServiceInstanceEntity
         {
             Id = Guid.NewGuid(),
@@ -320,11 +347,19 @@ registryGroup.MapGet("/instances", async (
     HttpRequest httpRequest,
     HttpResponse httpResponse,
     IServiceRegistryRepository registry,
+    ApiKeyAuthorizationService authService,
     CancellationToken cancellationToken) =>
 {
     if (string.IsNullOrWhiteSpace(@namespace) || string.IsNullOrWhiteSpace(group) || string.IsNullOrWhiteSpace(serviceName))
     {
         return Error(httpRequest.HttpContext, ErrorCodes.ValidationFailed, "Namespace, group, and serviceName are required.", StatusCodes.Status400BadRequest);
+    }
+
+    var readResource = $"registry:{@namespace}/{group}/{serviceName}";
+    var authResult = authService.AuthorizeAction(httpRequest.HttpContext, @namespace, group, "registry.read", readResource);
+    if (!authResult.Allowed)
+    {
+        return Error(httpRequest.HttpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var service = await registry.GetServiceAsync(@namespace, group, serviceName, cancellationToken);
@@ -363,11 +398,19 @@ registryGroup.MapGet("/subscribe", async (
     HttpResponse httpResponse,
     IServiceRegistryRepository registry,
     RegistryChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
     CancellationToken cancellationToken) =>
 {
     if (string.IsNullOrWhiteSpace(@namespace) || string.IsNullOrWhiteSpace(group) || string.IsNullOrWhiteSpace(serviceName))
     {
         return Error(httpRequest.HttpContext, ErrorCodes.ValidationFailed, "Namespace, group, and serviceName are required.", StatusCodes.Status400BadRequest);
+    }
+
+    var readResource = $"registry:{@namespace}/{group}/{serviceName}";
+    var authResult = authService.AuthorizeAction(httpRequest.HttpContext, @namespace, group, "registry.read", readResource);
+    if (!authResult.Allowed)
+    {
+        return Error(httpRequest.HttpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var service = await registry.GetServiceAsync(@namespace, group, serviceName, cancellationToken);
@@ -418,6 +461,8 @@ registryGroup.MapGet("/services", async (
     string? @namespace,
     string? group,
     SiNanDbContext dbContext,
+    ApiKeyAuthorizationService authService,
+    HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
     var query = dbContext.Services.AsNoTracking();
@@ -430,6 +475,14 @@ registryGroup.MapGet("/services", async (
     if (!string.IsNullOrWhiteSpace(group))
     {
         query = query.Where(service => service.Group == group);
+    }
+
+    var sampleNamespace = string.IsNullOrWhiteSpace(@namespace) ? "default" : @namespace;
+    var sampleGroup = string.IsNullOrWhiteSpace(group) ? "DEFAULT_GROUP" : group;
+    var authResult = authService.AuthorizeAction(httpContext, sampleNamespace, sampleGroup, "registry.read", "registry:list");
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var items = await query
@@ -460,6 +513,8 @@ configGroup.MapPost("/", async (
     ConfigChangeNotifier notifier,
     ApiKeyAuthorizationService authService,
     AuditLogWriter auditLogWriter,
+    SiNanDbContext dbContext,
+    IOptions<QuotaOptions> quotaOptions,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -480,6 +535,23 @@ configGroup.MapPost("/", async (
     if (existing is not null)
     {
         return Error(httpContext, ErrorCodes.ConfigAlreadyExists, "Config already exists.", StatusCodes.Status409Conflict);
+    }
+
+    if (!ValidateConfigContentQuota(quotaOptions.Value, request.Content, out var quotaError))
+    {
+        return Error(httpContext, ErrorCodes.QuotaExceeded, quotaError, StatusCodes.Status403Forbidden);
+    }
+
+    var maxConfigs = quotaOptions.Value.MaxConfigsPerNamespace;
+    if (maxConfigs > 0)
+    {
+        var configCount = await dbContext.ConfigItems
+            .AsNoTracking()
+            .CountAsync(c => c.Namespace == request.Namespace, cancellationToken);
+        if (configCount >= maxConfigs)
+        {
+            return Error(httpContext, ErrorCodes.QuotaExceeded, "Config quota exceeded.", StatusCodes.Status403Forbidden);
+        }
     }
 
     var now = DateTimeOffset.UtcNow;
@@ -545,6 +617,7 @@ configGroup.MapPut("/", async (
     ConfigChangeNotifier notifier,
     ApiKeyAuthorizationService authService,
     AuditLogWriter auditLogWriter,
+    IOptions<QuotaOptions> quotaOptions,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -565,6 +638,11 @@ configGroup.MapPut("/", async (
     if (existing is null)
     {
         return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    if (!ValidateConfigContentQuota(quotaOptions.Value, request.Content, out var quotaError))
+    {
+        return Error(httpContext, ErrorCodes.QuotaExceeded, quotaError, StatusCodes.Status403Forbidden);
     }
 
     var beforeConfig = new
@@ -638,6 +716,7 @@ configGroup.MapGet("/", async (
     string group,
     string key,
     IConfigRepository configRepository,
+    ApiKeyAuthorizationService authService,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -645,6 +724,13 @@ configGroup.MapGet("/", async (
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var configResource = $"config:{@namespace}/{group}/{key}";
+    var authResult = authService.AuthorizeAction(httpContext, @namespace, group, "config.read", configResource);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
@@ -662,9 +748,7 @@ configGroup.MapGet("/", async (
     .WithOpenApi();
 
 configGroup.MapDelete("/", async (
-    string @namespace,
-    string group,
-    string key,
+    ConfigDeleteRequest request,
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
     ConfigChangeNotifier notifier,
@@ -673,20 +757,20 @@ configGroup.MapDelete("/", async (
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
-    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    var errors = ConfigRequestValidator.ValidateKey(request.Namespace, request.Group, request.Key);
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
     }
 
-    var configResource = $"config:{@namespace}/{group}/{key}";
-    var authResult = authService.AuthorizeAction(httpContext, @namespace, group, "config.delete", configResource);
+    var configResource = $"config:{request.Namespace}/{request.Group}/{request.Key}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "config.delete", configResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
-    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    var config = await configRepository.GetConfigAsync(request.Namespace, request.Group, request.Key, cancellationToken);
     if (config is null)
     {
         return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
@@ -700,6 +784,12 @@ configGroup.MapDelete("/", async (
         config.ContentType,
         config.Version
     };
+
+    var history = await configRepository.GetHistoryAsync(config.Id, cancellationToken);
+    foreach (var item in history)
+    {
+        await configRepository.DeleteHistoryAsync(item, cancellationToken);
+    }
 
     await configRepository.DeleteConfigAsync(config, cancellationToken);
     await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -723,6 +813,7 @@ configGroup.MapGet("/history", async (
     string group,
     string key,
     IConfigRepository configRepository,
+    ApiKeyAuthorizationService authService,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -730,6 +821,13 @@ configGroup.MapGet("/history", async (
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var configResource = $"config:{@namespace}/{group}/{key}";
+    var authResult = authService.AuthorizeAction(httpContext, @namespace, group, "config.history", configResource);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
@@ -757,11 +855,7 @@ configGroup.MapGet("/history", async (
     .WithOpenApi();
 
 configGroup.MapPost("/rollback", async (
-    string @namespace,
-    string group,
-    string key,
-    int version,
-    string? publishedBy,
+    ConfigRollbackRequest request,
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
     ConfigChangeNotifier notifier,
@@ -770,32 +864,27 @@ configGroup.MapPost("/rollback", async (
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
-    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    var errors = ConfigRequestValidator.ValidateRollback(request);
     if (errors.Count > 0)
     {
-        return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid rollback request.", StatusCodes.Status400BadRequest, errors);
     }
 
-    if (version <= 0)
-    {
-        return Error(httpContext, ErrorCodes.ValidationFailed, "Version must be greater than 0.", StatusCodes.Status400BadRequest);
-    }
-
-    var configResource = $"config:{@namespace}/{group}/{key}";
-    var authResult = authService.AuthorizeAction(httpContext, @namespace, group, "config.rollback", configResource);
+    var configResource = $"config:{request.Namespace}/{request.Group}/{request.Key}";
+    var authResult = authService.AuthorizeAction(httpContext, request.Namespace, request.Group, "config.rollback", configResource);
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
-    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    var config = await configRepository.GetConfigAsync(request.Namespace, request.Group, request.Key, cancellationToken);
     if (config is null)
     {
         return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
     }
 
     var history = await configRepository.GetHistoryAsync(config.Id, cancellationToken);
-    var target = history.FirstOrDefault(item => item.Version == version);
+    var target = history.FirstOrDefault(item => item.Version == request.Version);
     if (target is null)
     {
         return Error(httpContext, ErrorCodes.ConfigHistoryNotFound, "Config history not found.", StatusCodes.Status404NotFound);
@@ -822,7 +911,7 @@ configGroup.MapPost("/rollback", async (
         ContentType = target.ContentType,
         Version = newVersion,
         PublishedAt = now,
-        PublishedBy = publishedBy,
+        PublishedBy = request.PublishedBy,
         CreatedAt = config.CreatedAt,
         UpdatedAt = now
     };
@@ -981,7 +1070,13 @@ auditGroup.MapGet("/", async (
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
-    var authResult = authService.AuthorizeAdmin(httpContext);
+    var adminResult = authService.AuthorizeAdmin(httpContext);
+    if (!adminResult.Allowed)
+    {
+        return Error(httpContext, adminResult.Code!, adminResult.Message!, adminResult.StatusCode!.Value);
+    }
+
+    var authResult = authService.AuthorizeAction(httpContext, "system", "audit", "audit.read", "audit:logs");
     if (!authResult.Allowed)
     {
         return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
@@ -1088,6 +1183,19 @@ static ConfigItemResponse ToConfigItemResponse(ConfigItemEntity config)
         PublishedBy = config.PublishedBy,
         UpdatedAt = config.UpdatedAt
     };
+}
+
+static bool ValidateConfigContentQuota(QuotaOptions options, string content, out string message)
+{
+    var maxLength = options.MaxConfigContentLength;
+    if (maxLength > 0 && content.Length > maxLength)
+    {
+        message = "Config content length exceeds quota.";
+        return false;
+    }
+
+    message = string.Empty;
+    return true;
 }
 
 static string BuildConfigKey(string @namespace, string group, string key)

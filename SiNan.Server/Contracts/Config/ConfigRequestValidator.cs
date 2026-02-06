@@ -69,4 +69,16 @@ public static class ConfigRequestValidator
 
         return errors;
     }
+
+    public static IReadOnlyList<string> ValidateRollback(ConfigRollbackRequest request)
+    {
+        var errors = ValidateKey(request.Namespace, request.Group, request.Key).ToList();
+
+        if (request.Version <= 0)
+        {
+            errors.Add("Version must be greater than 0.");
+        }
+
+        return errors;
+    }
 }

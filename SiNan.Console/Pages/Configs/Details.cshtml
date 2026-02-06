@@ -70,7 +70,10 @@
             <label class="form-label">Content</label>
             <textarea class="form-control" name="content" rows="8">@Model.Content</textarea>
         </div>
-        <button class="btn btn-primary" type="submit">发布更新</button>
+        <div class="action-row">
+            <button class="btn btn-primary" type="submit">发布更新</button>
+            <button class="btn btn-outline-danger" type="submit" formaction="?handler=Delete">删除配置</button>
+        </div>
     </form>
 </div>
 

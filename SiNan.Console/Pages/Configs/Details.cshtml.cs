@@ -135,17 +135,20 @@ public sealed class DetailsModel : PageModel
         try
         {
             var client = _httpClientFactory.CreateClient("SiNanServer");
-            var url = $"/api/v1/configs/rollback?namespace={Uri.EscapeDataString(Namespace)}&group={Uri.EscapeDataString(Group)}&key={Uri.EscapeDataString(Key)}&version={version}";
-            if (!string.IsNullOrWhiteSpace(PublishedBy))
-            {
-                url += $"&publishedBy={Uri.EscapeDataString(PublishedBy)}";
-            }
-
-            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/configs/rollback");
             if (!string.IsNullOrWhiteSpace(Token))
             {
                 request.Headers.TryAddWithoutValidation("X-SiNan-Token", Token);
             }
+
+            request.Content = JsonContent.Create(new
+            {
+                Namespace,
+                Group,
+                Key,
+                Version = version,
+                PublishedBy
+            });
 
             var response = await client.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -166,6 +169,46 @@ public sealed class DetailsModel : PageModel
         catch (HttpRequestException ex)
         {
             ErrorMessage = $"回滚失败: {ex.Message}";
+            return Page();
+        }
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Namespace) || string.IsNullOrWhiteSpace(Group) || string.IsNullOrWhiteSpace(Key))
+        {
+            ErrorMessage = "缺少必要参数。";
+            return Page();
+        }
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("SiNanServer");
+            using var request = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/configs");
+            if (!string.IsNullOrWhiteSpace(Token))
+            {
+                request.Headers.TryAddWithoutValidation("X-SiNan-Token", Token);
+            }
+
+            request.Content = JsonContent.Create(new
+            {
+                Namespace,
+                Group,
+                Key
+            });
+
+            var response = await client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                ErrorMessage = $"删除失败: {(int)response.StatusCode} {response.ReasonPhrase}";
+                return Page();
+            }
+
+            return RedirectToPage("/Configs/Index", new { @namespace = Namespace, group = Group });
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"删除失败: {ex.Message}";
             return Page();
         }
     }

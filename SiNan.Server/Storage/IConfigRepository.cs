@@ -15,4 +15,5 @@ public interface IConfigRepository
 
     Task<IReadOnlyList<ConfigHistoryEntity>> GetHistoryAsync(Guid configId, CancellationToken cancellationToken = default);
     Task AddHistoryAsync(ConfigHistoryEntity history, CancellationToken cancellationToken = default);
+    Task DeleteHistoryAsync(ConfigHistoryEntity history, CancellationToken cancellationToken = default);
 }

@@ -56,4 +56,10 @@ public sealed class EfConfigRepository : IConfigRepository
     {
         await _dbContext.ConfigHistory.AddAsync(history, cancellationToken);
     }
+
+    public Task DeleteHistoryAsync(ConfigHistoryEntity history, CancellationToken cancellationToken = default)
+    {
+        _dbContext.ConfigHistory.Remove(history);
+        return Task.CompletedTask;
+    }
 }
