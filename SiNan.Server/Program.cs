@@ -30,6 +30,8 @@ builder.Services.AddScoped<SiNan.Server.Storage.IConfigRepository, SiNan.Server.
 builder.Services.AddScoped<SiNan.Server.Storage.IAuditLogRepository, SiNan.Server.Storage.EfAuditLogRepository>();
 builder.Services.AddScoped<SiNan.Server.Storage.IUnitOfWork, SiNan.Server.Storage.EfUnitOfWork>();
 builder.Services.AddSingleton<RegistryChangeNotifier>();
+builder.Services.Configure<RegistryHealthOptions>(builder.Configuration.GetSection("Registry:Health"));
+builder.Services.AddHostedService<RegistryHealthMonitor>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
