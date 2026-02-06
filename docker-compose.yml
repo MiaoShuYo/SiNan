@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sinan-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sinan
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  sinan-server:
+    build:
+      context: .
+      dockerfile: ./SiNan.Server/Dockerfile
+    container_name: sinan-server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__SiNan: "Server=mysql;Port=3306;Database=sinan;User=root;Password=root;"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
