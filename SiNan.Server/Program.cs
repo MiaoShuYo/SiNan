@@ -4,6 +4,7 @@ using SiNan.Server.Audit;
 using SiNan.Server.Auth;
 using SiNan.Server.Config;
 using SiNan.Server.Contracts.Common;
+using SiNan.Server.Contracts.Audit;
 using SiNan.Server.Contracts.Config;
 using SiNan.Server.Contracts.Registry;
 using SiNan.Server.Data;
@@ -62,6 +63,7 @@ app.MapDefaultEndpoints();
 
 var registryGroup = app.MapGroup("/api/v1/registry");
 var configGroup = app.MapGroup("/api/v1/configs");
+var auditGroup = app.MapGroup("/api/v1/audit");
 
 registryGroup.MapPost("/register", async (
     RegisterInstanceRequest request,
@@ -845,6 +847,44 @@ configGroup.MapGet("/subscribe", async (
     .Produces(StatusCodes.Status304NotModified)
     .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
     .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+auditGroup.MapGet("/", async (
+    int? take,
+    string? action,
+    string? resource,
+    DateTimeOffset? from,
+    DateTimeOffset? to,
+    ApiKeyAuthorizationService authService,
+    IAuditLogRepository auditLogRepository,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var authResult = authService.AuthorizeAdmin(httpContext);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
+    }
+
+    var limit = Math.Clamp(take ?? 100, 1, 500);
+    var logs = await auditLogRepository.QueryAsync(limit, action, resource, from, to, cancellationToken);
+    var response = logs.Select(log => new AuditLogResponse
+    {
+        Actor = log.Actor,
+        Action = log.Action,
+        Resource = log.Resource,
+        BeforeJson = log.BeforeJson,
+        AfterJson = log.AfterJson,
+        TraceId = log.TraceId,
+        CreatedAt = log.CreatedAt
+    }).ToList();
+
+    return Results.Ok(response);
+})
+    .WithName("AuditQuery")
+    .Produces<List<AuditLogResponse>>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status401Unauthorized)
+    .Produces<ErrorResponse>(StatusCodes.Status403Forbidden)
     .WithOpenApi();
 
 var summaries = new[]

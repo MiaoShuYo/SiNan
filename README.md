@@ -41,6 +41,8 @@ docker compose --profile sqlite up -d
 Set `Auth__Enabled` to `true` and configure API tokens in `Auth__ApiKeys`.
 Send the token via `X-SiNan-Token` header. Optional actor header: `X-SiNan-Actor`.
 
+Admin keys set `IsAdmin=true` and can access audit query endpoint: `GET /api/v1/audit?take=100`.
+
 ## Notes
 - Database support targets MySQL and SQLite. SQLite will be used for local/dev; MySQL for production.
 - See requirements.md for detailed product requirements.

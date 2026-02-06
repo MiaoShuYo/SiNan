@@ -30,4 +30,40 @@ public sealed class EfAuditLogRepository : IAuditLogRepository
             .Take(take)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<AuditLogEntity>> QueryAsync(
+        int take,
+        string? action,
+        string? resource,
+        DateTimeOffset? from,
+        DateTimeOffset? to,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<AuditLogEntity> query = _dbContext.AuditLogs.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(action))
+        {
+            query = query.Where(log => log.Action == action);
+        }
+
+        if (!string.IsNullOrWhiteSpace(resource))
+        {
+            query = query.Where(log => log.Resource.Contains(resource));
+        }
+
+        if (from.HasValue)
+        {
+            query = query.Where(log => log.CreatedAt >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(log => log.CreatedAt <= to.Value);
+        }
+
+        return await query
+            .OrderByDescending(log => log.CreatedAt)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
 }

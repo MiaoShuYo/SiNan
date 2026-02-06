@@ -14,6 +14,7 @@ public sealed class ApiKeyDefinition
 {
     public string Key { get; set; } = string.Empty;
     public string? Actor { get; set; }
+    public bool IsAdmin { get; set; }
     public List<string> Namespaces { get; set; } = new();
     public List<string> Groups { get; set; } = new();
 }

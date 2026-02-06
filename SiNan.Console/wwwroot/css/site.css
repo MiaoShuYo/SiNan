@@ -171,6 +171,10 @@ h1, h2, h3 {
   color: var(--muted);
 }
 
+.alert {
+  border-radius: 12px;
+}
+
 .kv-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
