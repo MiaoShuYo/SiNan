@@ -62,6 +62,7 @@ Middleware behavior:
 Configure namespace-level limits in `Quota`:
 - `MaxServicesPerNamespace`, `MaxInstancesPerNamespace`, `MaxConfigsPerNamespace`, `MaxConfigContentLength`.
 Set to `0` to disable.
+
 ## .NET SDK (preview)
 ```csharp
 using SiNan.SDK.Config;
