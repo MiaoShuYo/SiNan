@@ -380,6 +380,7 @@ configGroup.MapPost("/", async (
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
     notifier.Notify(BuildConfigKey(config.Namespace, config.Group, config.Key));
+    ConfigMetrics.RecordChange();
 
     return Results.Ok(ToConfigItemResponse(config));
 })
@@ -444,6 +445,7 @@ configGroup.MapPut("/", async (
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
     notifier.Notify(BuildConfigKey(updated.Namespace, updated.Group, updated.Key));
+    ConfigMetrics.RecordChange();
 
     return Results.Ok(ToConfigItemResponse(updated));
 })
@@ -507,6 +509,7 @@ configGroup.MapDelete("/", async (
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
     notifier.Notify(BuildConfigKey(config.Namespace, config.Group, config.Key));
+    ConfigMetrics.RecordChange();
     return Results.Ok();
 })
     .WithName("ConfigDelete")
@@ -564,6 +567,8 @@ configGroup.MapGet("/subscribe", async (
     ConfigChangeNotifier notifier,
     CancellationToken cancellationToken) =>
 {
+    ConfigMetrics.RecordSubscribeRequest();
+
     var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
     if (errors.Count > 0)
     {
@@ -590,9 +595,12 @@ configGroup.MapGet("/subscribe", async (
 
     if (!changed)
     {
+        ConfigMetrics.RecordSubscribeTimeout();
         httpResponse.Headers.ETag = etagValue;
         return Results.StatusCode(StatusCodes.Status304NotModified);
     }
+
+    ConfigMetrics.RecordSubscribeChange();
 
     config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
     if (config is null)

@@ -58,7 +58,8 @@ public static class Extensions
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddMeter("SiNan.Registry");
+                    .AddMeter("SiNan.Registry")
+                    .AddMeter("SiNan.Config");
             })
             .WithTracing(tracing =>
             {
