@@ -77,6 +77,54 @@ public sealed class RegistryEndpointsTests : IClassFixture<SiNanWebApplicationFa
     }
 
     [Fact]
+    public async Task Subscribe_Returns_On_Change()
+    {
+        var register = new
+        {
+            Namespace = "default",
+            Group = "DEFAULT_GROUP",
+            ServiceName = "billing",
+            Host = "127.0.0.1",
+            Port = 9000,
+            Weight = 100,
+            TtlSeconds = 30,
+            IsEphemeral = true,
+            Metadata = new Dictionary<string, string>()
+        };
+
+        var registerResponse = await _client.PostAsJsonAsync("/api/v1/registry/register", register);
+        Assert.Equal(HttpStatusCode.OK, registerResponse.StatusCode);
+
+        var instancesResponse = await _client.GetAsync("/api/v1/registry/instances?namespace=default&group=DEFAULT_GROUP&serviceName=billing");
+        var etag = instancesResponse.Headers.ETag?.Tag ?? string.Empty;
+
+        var subscribeRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/registry/subscribe?namespace=default&group=DEFAULT_GROUP&serviceName=billing&timeoutMs=2000");
+        subscribeRequest.Headers.TryAddWithoutValidation("If-None-Match", etag);
+
+        var subscribeTask = _client.SendAsync(subscribeRequest);
+        await Task.Delay(200);
+
+        var register2 = new
+        {
+            Namespace = "default",
+            Group = "DEFAULT_GROUP",
+            ServiceName = "billing",
+            Host = "127.0.0.1",
+            Port = 9001,
+            Weight = 100,
+            TtlSeconds = 30,
+            IsEphemeral = true,
+            Metadata = new Dictionary<string, string>()
+        };
+
+        var register2Response = await _client.PostAsJsonAsync("/api/v1/registry/register", register2);
+        Assert.Equal(HttpStatusCode.OK, register2Response.StatusCode);
+
+        var subscribeResponse = await subscribeTask;
+        Assert.Equal(HttpStatusCode.OK, subscribeResponse.StatusCode);
+    }
+
+    [Fact]
     public async Task Register_Invalid_Request_Returns_BadRequest()
     {
         var register = new

@@ -1,4 +1,4 @@
-namespace SiNan.SDK;
+﻿namespace SiNan.SDK;
 
 public class Class1
 {
