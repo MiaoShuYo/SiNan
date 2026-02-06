@@ -7,4 +7,6 @@ public static class ErrorCodes
     public const string InstanceNotFound = "instance_not_found";
     public const string ConfigNotFound = "config_not_found";
     public const string ConfigAlreadyExists = "config_already_exists";
+    public const string Unauthorized = "unauthorized";
+    public const string Forbidden = "forbidden";
 }

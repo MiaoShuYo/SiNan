@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using SiNan.Server.Audit;
+using SiNan.Server.Auth;
 using SiNan.Server.Config;
 using SiNan.Server.Contracts.Common;
 using SiNan.Server.Contracts.Config;
@@ -32,12 +34,15 @@ builder.Services.AddScoped<SiNan.Server.Storage.IServiceRegistryRepository, SiNa
 builder.Services.AddScoped<SiNan.Server.Storage.IConfigRepository, SiNan.Server.Storage.EfConfigRepository>();
 builder.Services.AddScoped<SiNan.Server.Storage.IAuditLogRepository, SiNan.Server.Storage.EfAuditLogRepository>();
 builder.Services.AddScoped<SiNan.Server.Storage.IUnitOfWork, SiNan.Server.Storage.EfUnitOfWork>();
+builder.Services.AddScoped<AuditLogWriter>();
 builder.Services.AddSingleton<RegistryChangeNotifier>();
 builder.Services.AddSingleton<ConfigChangeNotifier>();
 builder.Services.Configure<RegistryHealthOptions>(builder.Configuration.GetSection("Registry:Health"));
 builder.Services.AddHostedService<RegistryHealthMonitor>();
 builder.Services.Configure<ConfigHistoryCleanupOptions>(builder.Configuration.GetSection("Config:HistoryCleanup"));
 builder.Services.AddHostedService<ConfigHistoryCleanupService>();
+builder.Services.Configure<ApiKeyAuthOptions>(builder.Configuration.GetSection("Auth"));
+builder.Services.AddSingleton<ApiKeyAuthorizationService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -63,6 +68,8 @@ registryGroup.MapPost("/register", async (
     IServiceRegistryRepository registry,
     IUnitOfWork unitOfWork,
     RegistryChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
+    AuditLogWriter auditLogWriter,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -70,6 +77,12 @@ registryGroup.MapPost("/register", async (
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid register request.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var now = DateTimeOffset.UtcNow;
@@ -100,6 +113,21 @@ registryGroup.MapPost("/register", async (
     }
 
     var instance = await registry.GetInstanceAsync(service.Id, request.Host, request.Port, cancellationToken);
+    var isNewInstance = instance is null;
+    var beforeInstance = instance is null
+        ? null
+        : new
+        {
+            instance.InstanceId,
+            instance.Host,
+            instance.Port,
+            instance.Weight,
+            instance.Healthy,
+            instance.TtlSeconds,
+            instance.IsEphemeral,
+            instance.MetadataJson
+        };
+
     if (instance is null)
     {
         instance = new ServiceInstanceEntity
@@ -134,6 +162,23 @@ registryGroup.MapPost("/register", async (
         await registry.UpdateInstanceAsync(instance, cancellationToken);
     }
 
+    var afterInstance = new
+    {
+        instance.InstanceId,
+        instance.Host,
+        instance.Port,
+        instance.Weight,
+        instance.Healthy,
+        instance.TtlSeconds,
+        instance.IsEphemeral,
+        instance.MetadataJson
+    };
+
+    var actor = authResult.Actor;
+    var auditAction = isNewInstance ? "registry.register" : "registry.update";
+    var auditResource = $"registry:{request.Namespace}/{request.Group}/{request.ServiceName}/{instance.InstanceId}";
+    await auditLogWriter.AddAsync(actor, auditAction, auditResource, beforeInstance, afterInstance, httpContext.TraceIdentifier, cancellationToken);
+
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
     notifier.Notify(BuildServiceKey(request.Namespace, request.Group, request.ServiceName));
@@ -150,6 +195,8 @@ registryGroup.MapPost("/deregister", async (
     IServiceRegistryRepository registry,
     IUnitOfWork unitOfWork,
     RegistryChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
+    AuditLogWriter auditLogWriter,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -157,6 +204,12 @@ registryGroup.MapPost("/deregister", async (
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid deregister request.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var service = await registry.GetServiceAsync(request.Namespace, request.Group, request.ServiceName, cancellationToken);
@@ -171,9 +224,26 @@ registryGroup.MapPost("/deregister", async (
         return Error(httpContext, ErrorCodes.InstanceNotFound, "Instance not found.", StatusCodes.Status404NotFound);
     }
 
+    var beforeInstance = new
+    {
+        instance.InstanceId,
+        instance.Host,
+        instance.Port,
+        instance.Weight,
+        instance.Healthy,
+        instance.TtlSeconds,
+        instance.IsEphemeral,
+        instance.MetadataJson
+    };
+
     await registry.DeleteInstanceAsync(instance, cancellationToken);
     service.UpdatedAt = DateTimeOffset.UtcNow;
     await registry.UpdateServiceAsync(service, cancellationToken);
+
+    var actor = authResult.Actor;
+    var auditResource = $"registry:{request.Namespace}/{request.Group}/{request.ServiceName}/{instance.InstanceId}";
+    await auditLogWriter.AddAsync(actor, "registry.deregister", auditResource, beforeInstance, null, httpContext.TraceIdentifier, cancellationToken);
+
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
     notifier.Notify(BuildServiceKey(request.Namespace, request.Group, request.ServiceName));
@@ -190,6 +260,7 @@ registryGroup.MapPost("/heartbeat", async (
     HeartbeatRequest request,
     IServiceRegistryRepository registry,
     IUnitOfWork unitOfWork,
+    ApiKeyAuthorizationService authService,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -197,6 +268,12 @@ registryGroup.MapPost("/heartbeat", async (
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid heartbeat request.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var service = await registry.GetServiceAsync(request.Namespace, request.Group, request.ServiceName, cancellationToken);
@@ -372,6 +449,8 @@ configGroup.MapPost("/", async (
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
     ConfigChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
+    AuditLogWriter auditLogWriter,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -379,6 +458,12 @@ configGroup.MapPost("/", async (
     if (errors.Count > 0)
     {
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid config request.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
     }
 
     var existing = await configRepository.GetConfigAsync(request.Namespace, request.Group, request.Key, cancellationToken);
@@ -423,6 +508,18 @@ configGroup.MapPost("/", async (
     notifier.Notify(BuildConfigKey(config.Namespace, config.Group, config.Key));
     ConfigMetrics.RecordChange();
 
+    var actor = authResult.Actor;
+    var auditResource = $"config:{config.Namespace}/{config.Group}/{config.Key}";
+    var afterConfig = new
+    {
+        config.Namespace,
+        config.Group,
+        config.Key,
+        config.ContentType,
+        config.Version
+    };
+    await auditLogWriter.AddAsync(actor, "config.create", auditResource, null, afterConfig, httpContext.TraceIdentifier, cancellationToken);
+
     return Results.Ok(ToConfigItemResponse(config));
 })
     .WithName("ConfigCreate")
@@ -436,6 +533,8 @@ configGroup.MapPut("/", async (
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
     ConfigChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
+    AuditLogWriter auditLogWriter,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -445,11 +544,26 @@ configGroup.MapPut("/", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid config request.", StatusCodes.Status400BadRequest, errors);
     }
 
+    var authResult = authService.AuthorizeNamespaceGroup(httpContext, request.Namespace, request.Group);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
+    }
+
     var existing = await configRepository.GetConfigAsync(request.Namespace, request.Group, request.Key, cancellationToken);
     if (existing is null)
     {
         return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
     }
+
+    var beforeConfig = new
+    {
+        existing.Namespace,
+        existing.Group,
+        existing.Key,
+        existing.ContentType,
+        existing.Version
+    };
 
     var now = DateTimeOffset.UtcNow;
     var contentType = string.IsNullOrWhiteSpace(request.ContentType) ? "text/plain" : request.ContentType!;
@@ -487,6 +601,18 @@ configGroup.MapPut("/", async (
 
     notifier.Notify(BuildConfigKey(updated.Namespace, updated.Group, updated.Key));
     ConfigMetrics.RecordChange();
+
+    var actor = authResult.Actor;
+    var auditResource = $"config:{updated.Namespace}/{updated.Group}/{updated.Key}";
+    var afterConfig = new
+    {
+        updated.Namespace,
+        updated.Group,
+        updated.Key,
+        updated.ContentType,
+        updated.Version
+    };
+    await auditLogWriter.AddAsync(actor, "config.update", auditResource, beforeConfig, afterConfig, httpContext.TraceIdentifier, cancellationToken);
 
     return Results.Ok(ToConfigItemResponse(updated));
 })
@@ -531,6 +657,8 @@ configGroup.MapDelete("/", async (
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
     ConfigChangeNotifier notifier,
+    ApiKeyAuthorizationService authService,
+    AuditLogWriter auditLogWriter,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -540,17 +668,36 @@ configGroup.MapDelete("/", async (
         return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
     }
 
+    var authResult = authService.AuthorizeNamespaceGroup(httpContext, @namespace, group);
+    if (!authResult.Allowed)
+    {
+        return Error(httpContext, authResult.Code!, authResult.Message!, authResult.StatusCode!.Value);
+    }
+
     var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
     if (config is null)
     {
         return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
     }
 
+    var beforeConfig = new
+    {
+        config.Namespace,
+        config.Group,
+        config.Key,
+        config.ContentType,
+        config.Version
+    };
+
     await configRepository.DeleteConfigAsync(config, cancellationToken);
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
     notifier.Notify(BuildConfigKey(config.Namespace, config.Group, config.Key));
     ConfigMetrics.RecordChange();
+
+    var actor = authResult.Actor;
+    var auditResource = $"config:{config.Namespace}/{config.Group}/{config.Key}";
+    await auditLogWriter.AddAsync(actor, "config.delete", auditResource, beforeConfig, null, httpContext.TraceIdentifier, cancellationToken);
     return Results.Ok();
 })
     .WithName("ConfigDelete")
