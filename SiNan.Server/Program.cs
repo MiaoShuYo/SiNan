@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using SiNan.Server.Config;
 using SiNan.Server.Contracts.Common;
 using SiNan.Server.Contracts.Config;
 using SiNan.Server.Contracts.Registry;
@@ -32,6 +33,7 @@ builder.Services.AddScoped<SiNan.Server.Storage.IConfigRepository, SiNan.Server.
 builder.Services.AddScoped<SiNan.Server.Storage.IAuditLogRepository, SiNan.Server.Storage.EfAuditLogRepository>();
 builder.Services.AddScoped<SiNan.Server.Storage.IUnitOfWork, SiNan.Server.Storage.EfUnitOfWork>();
 builder.Services.AddSingleton<RegistryChangeNotifier>();
+builder.Services.AddSingleton<ConfigChangeNotifier>();
 builder.Services.Configure<RegistryHealthOptions>(builder.Configuration.GetSection("Registry:Health"));
 builder.Services.AddHostedService<RegistryHealthMonitor>();
 
@@ -328,6 +330,7 @@ configGroup.MapPost("/", async (
     ConfigUpsertRequest request,
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
+    ConfigChangeNotifier notifier,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -376,6 +379,8 @@ configGroup.MapPost("/", async (
 
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
+    notifier.Notify(BuildConfigKey(config.Namespace, config.Group, config.Key));
+
     return Results.Ok(ToConfigItemResponse(config));
 })
     .WithName("ConfigCreate")
@@ -388,6 +393,7 @@ configGroup.MapPut("/", async (
     ConfigUpsertRequest request,
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
+    ConfigChangeNotifier notifier,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -437,6 +443,8 @@ configGroup.MapPut("/", async (
 
     await unitOfWork.SaveChangesAsync(cancellationToken);
 
+    notifier.Notify(BuildConfigKey(updated.Namespace, updated.Group, updated.Key));
+
     return Results.Ok(ToConfigItemResponse(updated));
 })
     .WithName("ConfigUpdate")
@@ -479,6 +487,7 @@ configGroup.MapDelete("/", async (
     string key,
     IConfigRepository configRepository,
     IUnitOfWork unitOfWork,
+    ConfigChangeNotifier notifier,
     HttpContext httpContext,
     CancellationToken cancellationToken) =>
 {
@@ -496,6 +505,8 @@ configGroup.MapDelete("/", async (
 
     await configRepository.DeleteConfigAsync(config, cancellationToken);
     await unitOfWork.SaveChangesAsync(cancellationToken);
+
+    notifier.Notify(BuildConfigKey(config.Namespace, config.Group, config.Key));
     return Results.Ok();
 })
     .WithName("ConfigDelete")
@@ -538,6 +549,64 @@ configGroup.MapGet("/history", async (
 })
     .WithName("ConfigHistory")
     .Produces<List<ConfigHistoryResponse>>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+configGroup.MapGet("/subscribe", async (
+    string @namespace,
+    string group,
+    string key,
+    int? timeoutMs,
+    HttpRequest httpRequest,
+    HttpResponse httpResponse,
+    IConfigRepository configRepository,
+    ConfigChangeNotifier notifier,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    if (errors.Count > 0)
+    {
+        return Error(httpRequest.HttpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    if (config is null)
+    {
+        return Error(httpRequest.HttpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    var etagValue = BuildConfigEtag(config);
+    if (!httpRequest.Headers.TryGetValue("If-None-Match", out var ifNoneMatch) || ifNoneMatch != etagValue)
+    {
+        httpResponse.Headers.ETag = etagValue;
+        return Results.Ok(ToConfigItemResponse(config));
+    }
+
+    var timeout = TimeSpan.FromMilliseconds(Math.Clamp(timeoutMs ?? 30000, 1000, 60000));
+    var keyValue = BuildConfigKey(@namespace, group, key);
+    var currentVersion = notifier.GetVersion(keyValue);
+    var changed = await notifier.WaitForChangeAsync(keyValue, currentVersion, timeout, cancellationToken);
+
+    if (!changed)
+    {
+        httpResponse.Headers.ETag = etagValue;
+        return Results.StatusCode(StatusCodes.Status304NotModified);
+    }
+
+    config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    if (config is null)
+    {
+        return Error(httpRequest.HttpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    etagValue = BuildConfigEtag(config);
+    httpResponse.Headers.ETag = etagValue;
+    return Results.Ok(ToConfigItemResponse(config));
+})
+    .WithName("ConfigSubscribe")
+    .Produces<ConfigItemResponse>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status304NotModified)
     .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
     .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
     .WithOpenApi();
@@ -622,6 +691,17 @@ static ConfigItemResponse ToConfigItemResponse(ConfigItemEntity config)
         PublishedBy = config.PublishedBy,
         UpdatedAt = config.UpdatedAt
     };
+}
+
+static string BuildConfigKey(string @namespace, string group, string key)
+{
+    return $"{@namespace}::{group}::{key}";
+}
+
+static string BuildConfigEtag(ConfigItemEntity config)
+{
+    var publishedAt = config.PublishedAt?.ToUnixTimeMilliseconds() ?? 0;
+    return $"\"{config.Id}:{config.Version}:{publishedAt}\"";
 }
 
 static IResult Error(HttpContext context, string code, string message, int statusCode, object? details = null)
