@@ -125,6 +125,11 @@ h1, h2, h3 {
   margin-bottom: 2rem;
 }
 
+.page-header > div:first-child {
+  display: grid;
+  gap: 0.25rem;
+}
+
 .page-header .muted {
   color: var(--muted);
 }

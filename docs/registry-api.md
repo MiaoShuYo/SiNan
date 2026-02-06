@@ -31,6 +31,7 @@ Response:
   "serviceId": "<guid>"
 }
 ```
+Requires action: `registry.register`
 
 ## Deregister instance
 POST /deregister
@@ -46,6 +47,7 @@ Request body:
   "port": 8080
 }
 ```
+Requires action: `registry.deregister`
 
 ## Heartbeat
 POST /heartbeat
@@ -61,26 +63,20 @@ Request body:
   "port": 8080
 }
 ```
+Requires action: `registry.heartbeat`
 
 ## List instances
 GET /instances
 
 Query parameters:
-- namespace (required)
-- group (required)
-- serviceName (required)
-- healthyOnly (optional, default true)
 
 Notes:
-- Returns `ETag` header for cache validation.
-- Send `If-None-Match` with the last `ETag` to receive `304 Not Modified`.
+Requires action: `registry.read`
 
 ## List services
 GET /services
 
 Query parameters:
-- namespace (optional)
-- group (optional)
 
 Response:
 
@@ -96,21 +92,15 @@ Response:
   }
 ]
 ```
+Requires action: `registry.read`
 
 ## Subscribe (long-poll)
 GET /subscribe
 
 Query parameters:
-- namespace (required)
-- group (required)
-- serviceName (required)
-- healthyOnly (optional, default true)
-- timeoutMs (optional, clamped to 1000-60000, default 30000)
 
 Notes:
-- Send `If-None-Match` with the last `ETag`.
-- If there is no change before timeout, returns `304 Not Modified` with the same `ETag`.
-- If a change occurs, returns a full `ServiceInstancesResponse` with a new `ETag`.
+Requires action: `registry.read`
 
 Example:
 
