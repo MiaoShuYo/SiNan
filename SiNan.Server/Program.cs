@@ -9,6 +9,7 @@ using SiNan.Server.Contracts.Config;
 using SiNan.Server.Contracts.Registry;
 using SiNan.Server.Data;
 using SiNan.Server.Data.Entities;
+using SiNan.Server.Quotas;
 using SiNan.Server.Registry;
 using SiNan.Server.Storage;
 
@@ -44,6 +45,7 @@ builder.Services.Configure<ConfigHistoryCleanupOptions>(builder.Configuration.Ge
 builder.Services.AddHostedService<ConfigHistoryCleanupService>();
 builder.Services.Configure<ApiKeyAuthOptions>(builder.Configuration.GetSection("Auth"));
 builder.Services.AddSingleton<ApiKeyAuthorizationService>();
+builder.Services.Configure<QuotaOptions>(builder.Configuration.GetSection("Quota"));
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -58,6 +60,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ApiKeyAuthMiddleware>();
 
 app.MapDefaultEndpoints();
 

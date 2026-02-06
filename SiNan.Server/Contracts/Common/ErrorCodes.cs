@@ -8,6 +8,7 @@ public static class ErrorCodes
     public const string ConfigNotFound = "config_not_found";
     public const string ConfigAlreadyExists = "config_already_exists";
     public const string ConfigHistoryNotFound = "config_history_not_found";
+    public const string QuotaExceeded = "quota_exceeded";
     public const string Unauthorized = "unauthorized";
     public const string Forbidden = "forbidden";
 }

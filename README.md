@@ -47,20 +47,26 @@ RBAC filters:
 - `AllowedActions` restricts operations (e.g. `config.create`, `config.update`, `config.delete`, `config.rollback`, `registry.register`, `registry.deregister`, `registry.heartbeat`).
 - `AllowedResources` uses prefix matching (e.g. `config:default/DEFAULT_GROUP/` or `registry:default/DEFAULT_GROUP/orders`).
 
+Middleware behavior:
+- When auth is enabled, write requests (`POST/PUT/PATCH/DELETE`) and `/api/v1/audit` require `X-SiNan-Token`.
+- Action-level checks still run inside handlers for namespace/group and action/resource rules.
+
 ## Notes
 - Database support targets MySQL and SQLite. SQLite will be used for local/dev; MySQL for production.
 - See requirements.md for detailed product requirements.
 - Registry API reference: docs/registry-api.md
 - Config API reference: docs/config-api.md
+- HA/load test plan: docs/ha-load-test-plan.md
 
+## Quotas (optional)
+Configure namespace-level limits in `Quota`:
+- `MaxServicesPerNamespace`, `MaxInstancesPerNamespace`, `MaxConfigsPerNamespace`, `MaxConfigContentLength`.
+Set to `0` to disable.
 ## .NET SDK (preview)
 ```csharp
-using Microsoft.Extensions.DependencyInjection;
-using SiNan.SDK;
 using SiNan.SDK.Config;
 using SiNan.SDK.Registry;
 
-var services = new ServiceCollection();
 services.AddSiNanClients(options =>
 {
 	options.BaseUrl = "http://localhost:5043";
