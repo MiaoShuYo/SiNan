@@ -121,3 +121,16 @@ curl -i "http://localhost:5043/api/v1/registry/subscribe?namespace=default&group
   ]
 }
 ```
+
+## ErrorResponse
+
+All error responses use a consistent structure:
+
+```json
+{
+  "code": "validation_failed",
+  "message": "Namespace, group, and serviceName are required.",
+  "details": null,
+  "traceId": "<trace-id>"
+}
+```

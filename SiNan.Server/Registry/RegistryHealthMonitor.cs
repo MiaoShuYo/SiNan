@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,10 @@ namespace SiNan.Server.Registry;
 
 public sealed class RegistryHealthMonitor : BackgroundService
 {
+    private static readonly Meter Meter = new("SiNan.Registry");
+    private static readonly Counter<long> EvictionsCounter = Meter.CreateCounter<long>("sinan.registry.evictions");
+    private static readonly Counter<long> UnhealthyCounter = Meter.CreateCounter<long>("sinan.registry.unhealthy_marks");
+
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly RegistryChangeNotifier _notifier;
     private readonly IOptions<RegistryHealthOptions> _options;
@@ -67,6 +72,8 @@ public sealed class RegistryHealthMonitor : BackgroundService
         var evictionGrace = TimeSpan.FromSeconds(Math.Max(0, settings.EvictionGraceSeconds));
         var touchedServices = new HashSet<string>(StringComparer.Ordinal);
         var changeCount = 0;
+        var evictedCount = 0;
+        var unhealthyCount = 0;
 
         foreach (var instance in instances)
         {
@@ -83,6 +90,8 @@ public sealed class RegistryHealthMonitor : BackgroundService
             {
                 dbContext.ServiceInstances.Remove(instance);
                 changeCount++;
+                evictedCount++;
+                EvictionsCounter.Add(1);
                 TouchService(instance.Service, now, touchedServices);
                 continue;
             }
@@ -96,6 +105,8 @@ public sealed class RegistryHealthMonitor : BackgroundService
             instance.UpdatedAt = now;
             dbContext.ServiceInstances.Update(instance);
             changeCount++;
+            unhealthyCount++;
+            UnhealthyCounter.Add(1);
             TouchService(instance.Service, now, touchedServices);
         }
 
@@ -105,6 +116,12 @@ public sealed class RegistryHealthMonitor : BackgroundService
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Registry health scan applied changes. Evicted={EvictedCount}, MarkedUnhealthy={UnhealthyCount}, ServicesTouched={ServiceCount}",
+            evictedCount,
+            unhealthyCount,
+            touchedServices.Count);
 
         foreach (var serviceKey in touchedServices)
         {

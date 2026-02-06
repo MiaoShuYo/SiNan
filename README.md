@@ -41,3 +41,4 @@ docker compose --profile sqlite up -d
 - Database support targets MySQL and SQLite. SQLite will be used for local/dev; MySQL for production.
 - See requirements.md for detailed product requirements.
 - Registry API reference: docs/registry-api.md
+- Config API reference: docs/config-api.md
