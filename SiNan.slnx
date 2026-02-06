@@ -3,5 +3,6 @@
   <Project Path="SiNan.Console/SiNan.Console.csproj" />
   <Project Path="SiNan.SDK/SiNan.SDK.csproj" />
   <Project Path="SiNan.Server/SiNan.Server.csproj" />
+  <Project Path="SiNan.Server.Tests/SiNan.Server.Tests.csproj" />
   <Project Path="SiNan.ServiceDefaults/SiNan.ServiceDefaults.csproj" />
 </Solution>
