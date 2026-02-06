@@ -82,6 +82,7 @@ Notes:
 - Send `If-None-Match` with the last `ETag`.
 - If there is no change before timeout, returns `304 Not Modified` with the same `ETag`.
 - If a change occurs, returns the latest config with a new `ETag`.
+- History retention is controlled by `Config:HistoryCleanup` settings in appsettings.
 
 Example:
 

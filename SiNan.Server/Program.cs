@@ -36,6 +36,8 @@ builder.Services.AddSingleton<RegistryChangeNotifier>();
 builder.Services.AddSingleton<ConfigChangeNotifier>();
 builder.Services.Configure<RegistryHealthOptions>(builder.Configuration.GetSection("Registry:Health"));
 builder.Services.AddHostedService<RegistryHealthMonitor>();
+builder.Services.Configure<ConfigHistoryCleanupOptions>(builder.Configuration.GetSection("Config:HistoryCleanup"));
+builder.Services.AddHostedService<ConfigHistoryCleanupService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
