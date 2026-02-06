@@ -23,6 +23,20 @@ dotnet run --project SiNan.AppHost
 docker build -t sinan-server ./SiNan.Server
 ```
 
+## Docker Compose
+```bash
+docker compose up -d
+```
+
+SQLite-only profile:
+```bash
+docker compose --profile sqlite up -d
+```
+
+## Configuration
+- `Data__Provider`: `Sqlite` (default) or `MySql`
+- `ConnectionStrings__SiNan`: provider-specific connection string
+
 ## Notes
 - Database support targets MySQL and SQLite. SQLite will be used for local/dev; MySQL for production.
 - See requirements.md for detailed product requirements.

@@ -1,6 +1,29 @@
+using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+var provider = builder.Configuration.GetValue<string>("Data:Provider") ?? "Sqlite";
+var connectionString = builder.Configuration.GetConnectionString("SiNan") ?? "Data Source=sinan.db";
+
+builder.Services.AddDbContext<SiNan.Server.Data.SiNanDbContext>(options =>
+{
+    if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)));
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
+});
+
+builder.Services.AddScoped<SiNan.Server.Storage.IServiceRegistryRepository, SiNan.Server.Storage.EfServiceRegistryRepository>();
+builder.Services.AddScoped<SiNan.Server.Storage.IConfigRepository, SiNan.Server.Storage.EfConfigRepository>();
+builder.Services.AddScoped<SiNan.Server.Storage.IAuditLogRepository, SiNan.Server.Storage.EfAuditLogRepository>();
+builder.Services.AddScoped<SiNan.Server.Storage.IUnitOfWork, SiNan.Server.Storage.EfUnitOfWork>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

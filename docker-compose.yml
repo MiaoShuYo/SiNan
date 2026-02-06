@@ -11,6 +11,11 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   sinan-server:
     build:
@@ -19,11 +24,39 @@ services:
     container_name: sinan-server
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      Data__Provider: MySql
       ConnectionStrings__SiNan: "Server=mysql;Port=3306;Database=sinan;User=root;Password=root;"
     ports:
       - "8080:8080"
     depends_on:
       - mysql
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sinan-server-sqlite:
+    profiles:
+      - sqlite
+    build:
+      context: .
+      dockerfile: ./SiNan.Server/Dockerfile
+    container_name: sinan-server-sqlite
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Data__Provider: Sqlite
+      ConnectionStrings__SiNan: "Data Source=/data/sinan.db"
+    ports:
+      - "8081:8080"
+    volumes:
+      - sqlite_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_data:
+  sqlite_data:
