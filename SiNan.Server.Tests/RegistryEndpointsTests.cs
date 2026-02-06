@@ -50,6 +50,16 @@ public sealed class RegistryEndpointsTests : IClassFixture<SiNanWebApplicationFa
         var heartbeatResponse = await _client.PostAsJsonAsync("/api/v1/registry/heartbeat", heartbeat);
         Assert.Equal(HttpStatusCode.OK, heartbeatResponse.StatusCode);
 
+        var instancesResponse = await _client.GetAsync("/api/v1/registry/instances?namespace=default&group=DEFAULT_GROUP&serviceName=orders");
+        Assert.Equal(HttpStatusCode.OK, instancesResponse.StatusCode);
+        Assert.True(instancesResponse.Headers.ETag is not null);
+
+        var etag = instancesResponse.Headers.ETag?.Tag ?? string.Empty;
+        var cachedRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/registry/instances?namespace=default&group=DEFAULT_GROUP&serviceName=orders");
+        cachedRequest.Headers.TryAddWithoutValidation("If-None-Match", etag);
+        var cachedResponse = await _client.SendAsync(cachedRequest);
+        Assert.Equal(HttpStatusCode.NotModified, cachedResponse.StatusCode);
+
         var deregister = new
         {
             Namespace = "default",

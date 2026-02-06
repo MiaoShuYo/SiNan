@@ -183,6 +183,61 @@ registryGroup.MapPost("/heartbeat", async (
     return Results.Ok(new { instanceId = instance.InstanceId });
 });
 
+registryGroup.MapGet("/instances", async (
+    string @namespace,
+    string group,
+    string serviceName,
+    bool? healthyOnly,
+    HttpRequest httpRequest,
+    HttpResponse httpResponse,
+    IServiceRegistryRepository registry,
+    CancellationToken cancellationToken) =>
+{
+    if (string.IsNullOrWhiteSpace(@namespace) || string.IsNullOrWhiteSpace(group) || string.IsNullOrWhiteSpace(serviceName))
+    {
+        return Results.BadRequest(new { error = "Namespace, group, and serviceName are required." });
+    }
+
+    var service = await registry.GetServiceAsync(@namespace, group, serviceName, cancellationToken);
+    if (service is null)
+    {
+        return Results.NotFound(new { error = "Service not found." });
+    }
+
+    var instances = await registry.ListInstancesAsync(service.Id, healthyOnly ?? true, cancellationToken);
+    var latestUpdate = instances.Count == 0
+        ? service.UpdatedAt
+        : instances.Max(i => i.UpdatedAt);
+    var etagValue = $"\"{service.Id}:{latestUpdate.ToUnixTimeMilliseconds()}:{instances.Count}\"";
+
+    if (httpRequest.Headers.TryGetValue("If-None-Match", out var ifNoneMatch) && ifNoneMatch == etagValue)
+    {
+        return Results.StatusCode(StatusCodes.Status304NotModified);
+    }
+
+    var response = new ServiceInstancesResponse
+    {
+        Namespace = @namespace,
+        Group = group,
+        ServiceName = serviceName,
+        ETag = etagValue,
+        Instances = instances.Select(instance => new ServiceInstanceDto
+        {
+            InstanceId = instance.InstanceId,
+            Host = instance.Host,
+            Port = instance.Port,
+            Weight = instance.Weight,
+            Healthy = instance.Healthy,
+            TtlSeconds = instance.TtlSeconds,
+            IsEphemeral = instance.IsEphemeral,
+            Metadata = MetadataParser.Parse(instance.MetadataJson)
+        }).ToList()
+    };
+
+    httpResponse.Headers.ETag = etagValue;
+    return Results.Ok(response);
+});
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
