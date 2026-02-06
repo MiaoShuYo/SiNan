@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using SiNan.Server.Contracts.Common;
+using SiNan.Server.Contracts.Config;
 using SiNan.Server.Contracts.Registry;
 using SiNan.Server.Data;
 using SiNan.Server.Data.Entities;
@@ -51,6 +52,7 @@ app.UseHttpsRedirection();
 app.MapDefaultEndpoints();
 
 var registryGroup = app.MapGroup("/api/v1/registry");
+var configGroup = app.MapGroup("/api/v1/configs");
 
 registryGroup.MapPost("/register", async (
     RegisterInstanceRequest request,
@@ -322,6 +324,224 @@ registryGroup.MapGet("/subscribe", async (
     .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
     .WithOpenApi();
 
+configGroup.MapPost("/", async (
+    ConfigUpsertRequest request,
+    IConfigRepository configRepository,
+    IUnitOfWork unitOfWork,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateUpsert(request);
+    if (errors.Count > 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid config request.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var existing = await configRepository.GetConfigAsync(request.Namespace, request.Group, request.Key, cancellationToken);
+    if (existing is not null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigAlreadyExists, "Config already exists.", StatusCodes.Status409Conflict);
+    }
+
+    var now = DateTimeOffset.UtcNow;
+    var contentType = string.IsNullOrWhiteSpace(request.ContentType) ? "text/plain" : request.ContentType!;
+
+    var config = new ConfigItemEntity
+    {
+        Id = Guid.NewGuid(),
+        Namespace = request.Namespace,
+        Group = request.Group,
+        Key = request.Key,
+        Content = request.Content,
+        ContentType = contentType,
+        Version = 1,
+        PublishedAt = now,
+        PublishedBy = request.PublishedBy,
+        CreatedAt = now,
+        UpdatedAt = now
+    };
+
+    await configRepository.AddConfigAsync(config, cancellationToken);
+    await configRepository.AddHistoryAsync(new ConfigHistoryEntity
+    {
+        Id = Guid.NewGuid(),
+        ConfigId = config.Id,
+        Version = 1,
+        Content = config.Content,
+        ContentType = config.ContentType,
+        PublishedAt = now,
+        PublishedBy = config.PublishedBy,
+        CreatedAt = now
+    }, cancellationToken);
+
+    await unitOfWork.SaveChangesAsync(cancellationToken);
+
+    return Results.Ok(ToConfigItemResponse(config));
+})
+    .WithName("ConfigCreate")
+    .Produces<ConfigItemResponse>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status409Conflict)
+    .WithOpenApi();
+
+configGroup.MapPut("/", async (
+    ConfigUpsertRequest request,
+    IConfigRepository configRepository,
+    IUnitOfWork unitOfWork,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateUpsert(request);
+    if (errors.Count > 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Invalid config request.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var existing = await configRepository.GetConfigAsync(request.Namespace, request.Group, request.Key, cancellationToken);
+    if (existing is null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    var now = DateTimeOffset.UtcNow;
+    var contentType = string.IsNullOrWhiteSpace(request.ContentType) ? "text/plain" : request.ContentType!;
+    var newVersion = existing.Version + 1;
+
+    var updated = new ConfigItemEntity
+    {
+        Id = existing.Id,
+        Namespace = existing.Namespace,
+        Group = existing.Group,
+        Key = existing.Key,
+        Content = request.Content,
+        ContentType = contentType,
+        Version = newVersion,
+        PublishedAt = now,
+        PublishedBy = request.PublishedBy,
+        CreatedAt = existing.CreatedAt,
+        UpdatedAt = now
+    };
+
+    await configRepository.UpdateConfigAsync(updated, cancellationToken);
+    await configRepository.AddHistoryAsync(new ConfigHistoryEntity
+    {
+        Id = Guid.NewGuid(),
+        ConfigId = updated.Id,
+        Version = newVersion,
+        Content = updated.Content,
+        ContentType = updated.ContentType,
+        PublishedAt = now,
+        PublishedBy = updated.PublishedBy,
+        CreatedAt = now
+    }, cancellationToken);
+
+    await unitOfWork.SaveChangesAsync(cancellationToken);
+
+    return Results.Ok(ToConfigItemResponse(updated));
+})
+    .WithName("ConfigUpdate")
+    .Produces<ConfigItemResponse>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+configGroup.MapGet("/", async (
+    string @namespace,
+    string group,
+    string key,
+    IConfigRepository configRepository,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    if (errors.Count > 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    if (config is null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    return Results.Ok(ToConfigItemResponse(config));
+})
+    .WithName("ConfigGet")
+    .Produces<ConfigItemResponse>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+configGroup.MapDelete("/", async (
+    string @namespace,
+    string group,
+    string key,
+    IConfigRepository configRepository,
+    IUnitOfWork unitOfWork,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    if (errors.Count > 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    if (config is null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    await configRepository.DeleteConfigAsync(config, cancellationToken);
+    await unitOfWork.SaveChangesAsync(cancellationToken);
+    return Results.Ok();
+})
+    .WithName("ConfigDelete")
+    .Produces(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
+configGroup.MapGet("/history", async (
+    string @namespace,
+    string group,
+    string key,
+    IConfigRepository configRepository,
+    HttpContext httpContext,
+    CancellationToken cancellationToken) =>
+{
+    var errors = ConfigRequestValidator.ValidateKey(@namespace, group, key);
+    if (errors.Count > 0)
+    {
+        return Error(httpContext, ErrorCodes.ValidationFailed, "Namespace, group, and key are required.", StatusCodes.Status400BadRequest, errors);
+    }
+
+    var config = await configRepository.GetConfigAsync(@namespace, group, key, cancellationToken);
+    if (config is null)
+    {
+        return Error(httpContext, ErrorCodes.ConfigNotFound, "Config not found.", StatusCodes.Status404NotFound);
+    }
+
+    var history = await configRepository.GetHistoryAsync(config.Id, cancellationToken);
+    var response = history.Select(item => new ConfigHistoryResponse
+    {
+        Version = item.Version,
+        Content = item.Content,
+        ContentType = item.ContentType,
+        PublishedAt = item.PublishedAt,
+        PublishedBy = item.PublishedBy
+    }).ToList();
+
+    return Results.Ok(response);
+})
+    .WithName("ConfigHistory")
+    .Produces<List<ConfigHistoryResponse>>(StatusCodes.Status200OK)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
+    .WithOpenApi();
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -385,6 +605,22 @@ static ServiceInstancesResponse BuildInstancesResponse(
             IsEphemeral = instance.IsEphemeral,
             Metadata = MetadataParser.Parse(instance.MetadataJson)
         }).ToList()
+    };
+}
+
+static ConfigItemResponse ToConfigItemResponse(ConfigItemEntity config)
+{
+    return new ConfigItemResponse
+    {
+        Namespace = config.Namespace,
+        Group = config.Group,
+        Key = config.Key,
+        Content = config.Content,
+        ContentType = config.ContentType,
+        Version = config.Version,
+        PublishedAt = config.PublishedAt,
+        PublishedBy = config.PublishedBy,
+        UpdatedAt = config.UpdatedAt
     };
 }
 
