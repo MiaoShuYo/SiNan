@@ -26,8 +26,12 @@ builder.Services.AddDbContext<SiNanDbContext>(options =>
 {
     if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
     {
-        // Use MySQL 8.0
-        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)));
+        // Use MySQL 8.0 with retry on failure
+        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)),
+            mySqlOptions => mySqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null));
     }
     else
     {

@@ -21,6 +21,7 @@ public sealed class SiNanDbContext : DbContext
         {
             entity.ToTable("services");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
             entity.HasIndex(e => new { e.Namespace, e.Group, e.Name }).IsUnique();
             entity.Property(e => e.Namespace).HasMaxLength(128).IsRequired();
             entity.Property(e => e.Group).HasMaxLength(128).IsRequired();
@@ -39,6 +40,7 @@ public sealed class SiNanDbContext : DbContext
         {
             entity.ToTable("service_instances");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
             entity.HasIndex(e => e.ServiceId);
             entity.HasIndex(e => new { e.ServiceId, e.Host, e.Port }).IsUnique();
             entity.Property(e => e.InstanceId).HasMaxLength(128);
@@ -58,6 +60,7 @@ public sealed class SiNanDbContext : DbContext
         {
             entity.ToTable("config_items");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
             entity.HasIndex(e => new { e.Namespace, e.Group, e.Key }).IsUnique();
             entity.Property(e => e.Namespace).HasMaxLength(128).IsRequired();
             entity.Property(e => e.Group).HasMaxLength(128).IsRequired();
@@ -78,6 +81,7 @@ public sealed class SiNanDbContext : DbContext
         {
             entity.ToTable("config_history");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
             entity.HasIndex(e => new { e.ConfigId, e.Version }).IsUnique();
             entity.Property(e => e.Content).HasMaxLength(65535).IsRequired();
             entity.Property(e => e.ContentType).HasMaxLength(64).IsRequired();
@@ -90,6 +94,7 @@ public sealed class SiNanDbContext : DbContext
         {
             entity.ToTable("audit_logs");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
             entity.HasIndex(e => e.CreatedAt);
             entity.Property(e => e.Actor).HasMaxLength(128).IsRequired();
             entity.Property(e => e.Action).HasMaxLength(128).IsRequired();
