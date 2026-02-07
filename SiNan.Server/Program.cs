@@ -69,6 +69,23 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Apply database migrations automatically
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<SiNanDbContext>();
+    try
+    {
+        // Apply pending migrations
+        dbContext.Database.Migrate();
+        app.Logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "An error occurred while applying database migrations.");
+        throw;
+    }
+}
+
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
