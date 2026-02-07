@@ -349,10 +349,10 @@ Set to `0` to disable specific quota checks.
 
 ### API Reference
 
-- [Registry API Documentation](docs/registry-api.md) - Service registration, discovery, and subscriptions
-- [Configuration API Documentation](docs/config-api.md) - Configuration management and versioning
-- [Audit API Documentation](docs/audit-api.md) - Audit log queries
-- [HA & Load Testing](docs/ha-load-test-plan.md) - High availability deployment guide
+- [Registry API Documentation](docs/registry-api.md) ([中文](docs/registry-api.zh-CN.md)) - Service registration, discovery, and subscriptions
+- [Configuration API Documentation](docs/config-api.md) ([中文](docs/config-api.zh-CN.md)) - Configuration management and versioning
+- [Audit API Documentation](docs/audit-api.md) ([中文](docs/audit-api.zh-CN.md)) - Audit log queries
+- [HA & Load Testing](docs/ha-load-test-plan.md) ([中文](docs/ha-load-test-plan.zh-CN.md)) - High availability deployment guide
 
 ### API Endpoints Overview
 

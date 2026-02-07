@@ -349,10 +349,10 @@ curl http://localhost:5043/api/v1/registry/instances?namespace=default&group=DEF
 
 ### API 参考
 
-- [注册中心 API 文档](docs/registry-api.md) - 服务注册、发现和订阅
-- [配置管理 API 文档](docs/config-api.md) - 配置管理和版本控制
-- [审计日志 API 文档](docs/audit-api.md) - 审计日志查询
-- [高可用与压测](docs/ha-load-test-plan.md) - 高可用部署指南
+- [注册中心 API 文档](docs/registry-api.zh-CN.md) ([English](docs/registry-api.md)) - 服务注册、发现和订阅
+- [配置管理 API 文档](docs/config-api.zh-CN.md) ([English](docs/config-api.md)) - 配置管理和版本控制
+- [审计日志 API 文档](docs/audit-api.zh-CN.md) ([English](docs/audit-api.md)) - 审计日志查询
+- [高可用与压测](docs/ha-load-test-plan.zh-CN.md) ([English](docs/ha-load-test-plan.md)) - 高可用部署指南
 
 ### API 端点概览
 

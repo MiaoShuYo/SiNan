@@ -1,5 +1,7 @@
 # Audit API
 
+English | [简体中文](audit-api.zh-CN.md)
+
 Base path: /api/v1/audit
 
 ## Query audit logs

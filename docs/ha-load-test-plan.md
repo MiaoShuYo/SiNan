@@ -1,5 +1,7 @@
 # HA and Load Test Plan
 
+English | [简体中文](ha-load-test-plan.zh-CN.md)
+
 ## Goals
 - Validate a single-node baseline for 5k+ instances.
 - Define HA topology for production.
