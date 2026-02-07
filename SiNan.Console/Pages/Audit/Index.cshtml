@@ -1,41 +1,41 @@
 @page
 @model SiNan.Console.Pages.Audit.IndexModel
 @{
-    ViewData["Title"] = "Audit";
+    ViewData["Title"] = L["Title.Audit"];
 }
 
 <section class="page-header">
     <div>
-        <p class="eyebrow">Audit</p>
-        <h1>审计日志</h1>
-        <p class="muted">展示最近的操作记录（需要管理员 Token）。</p>
+        <p class="eyebrow">@L["Audit.Eyebrow"]</p>
+        <h1>@L["Audit.Title"]</h1>
+        <p class="muted">@L["Audit.Subtitle"]</p>
     </div>
     <form method="get" class="filter-form">
         <div>
-            <label class="form-label">Token</label>
+            <label class="form-label">@L["Label.Token"]</label>
             <input class="form-control" name="token" value="@Model.Token" placeholder="X-SiNan-Token" />
         </div>
         <div>
-            <label class="form-label">Action</label>
+            <label class="form-label">@L["Label.Action"]</label>
             <input class="form-control" name="action" value="@Model.Action" placeholder="config.update" />
         </div>
         <div>
-            <label class="form-label">Resource</label>
+            <label class="form-label">@L["Label.Resource"]</label>
             <input class="form-control" name="resource" value="@Model.Resource" placeholder="config:default" />
         </div>
         <div>
-            <label class="form-label">Take</label>
+            <label class="form-label">@L["Label.Take"]</label>
             <input class="form-control" type="number" name="take" value="@Model.Take" min="1" max="500" />
         </div>
         <div>
-            <label class="form-label">From (UTC)</label>
+            <label class="form-label">@L["Label.FromUtc"]</label>
             <input class="form-control" type="datetime-local" name="from" value="@Model.From" />
         </div>
         <div>
-            <label class="form-label">To (UTC)</label>
+            <label class="form-label">@L["Label.ToUtc"]</label>
             <input class="form-control" type="datetime-local" name="to" value="@Model.To" />
         </div>
-        <button class="btn btn-primary" type="submit">查询</button>
+        <button class="btn btn-primary" type="submit">@L["Action.Search"]</button>
     </form>
 </section>
 
@@ -45,23 +45,23 @@
 }
 
 <div class="panel">
-    <div class="panel-title">最近记录</div>
+    <div class="panel-title">@L["Panel.Recent"]</div>
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
                 <tr>
-                    <th>时间</th>
-                    <th>Actor</th>
-                    <th>Action</th>
-                    <th>Resource</th>
-                    <th>Trace</th>
+                    <th>@L["Table.Time"]</th>
+                    <th>@L["Table.Actor"]</th>
+                    <th>@L["Table.Action"]</th>
+                    <th>@L["Table.Resource"]</th>
+                    <th>@L["Table.Trace"]</th>
                 </tr>
             </thead>
             <tbody>
             @if (Model.Logs.Count == 0)
             {
                 <tr>
-                    <td colspan="5" class="text-muted">暂无数据</td>
+                    <td colspan="5" class="text-muted">@L["Empty.Audit"]</td>
                 </tr>
             }
             else

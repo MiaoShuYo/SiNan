@@ -1,0 +1,36 @@
+@page
+@model SiNan.Console.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = L["Auth.Login"];
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">@L["Auth.Login"]</p>
+        <h1>@L["Auth.Login"]</h1>
+        <p class="muted">@L["Auth.LoginSubtitle"]</p>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <div class="panel-title">@L["Auth.LoginPanel"]</div>
+    <form method="post" class="config-form">
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <div class="form-grid">
+            <div>
+                <label class="form-label">@L["Auth.UserName"]</label>
+                <input class="form-control" name="userName" value="@Model.UserName" autocomplete="username" />
+            </div>
+            <div>
+                <label class="form-label">@L["Auth.Password"]</label>
+                <input class="form-control" name="password" type="password" autocomplete="current-password" />
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">@L["Auth.SignIn"]</button>
+    </form>
+</div>

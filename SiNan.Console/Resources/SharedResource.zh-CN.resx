@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Brand.Name" xml:space="preserve">
+    <value>SiNan 控制台</value>
+  </data>
+  <data name="Nav.Overview" xml:space="preserve">
+    <value>概览</value>
+  </data>
+  <data name="Nav.Services" xml:space="preserve">
+    <value>服务</value>
+  </data>
+  <data name="Nav.Configs" xml:space="preserve">
+    <value>配置</value>
+  </data>
+  <data name="Nav.Audit" xml:space="preserve">
+    <value>审计</value>
+  </data>
+  <data name="Nav.Privacy" xml:space="preserve">
+    <value>隐私</value>
+  </data>
+  <data name="Nav.Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Nav.LanguageEn" xml:space="preserve">
+    <value>EN</value>
+  </data>
+  <data name="Nav.LanguageZh" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="Title.Overview" xml:space="preserve">
+    <value>概览</value>
+  </data>
+  <data name="Title.Services" xml:space="preserve">
+    <value>服务</value>
+  </data>
+  <data name="Title.ServiceInstances" xml:space="preserve">
+    <value>服务实例</value>
+  </data>
+  <data name="Title.Configs" xml:space="preserve">
+    <value>配置</value>
+  </data>
+  <data name="Title.ConfigDetails" xml:space="preserve">
+    <value>配置详情</value>
+  </data>
+  <data name="Title.CreateConfig" xml:space="preserve">
+    <value>新建配置</value>
+  </data>
+  <data name="Title.Audit" xml:space="preserve">
+    <value>审计</value>
+  </data>
+  <data name="Title.Privacy" xml:space="preserve">
+    <value>隐私政策</value>
+  </data>
+  <data name="Title.Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Home.Eyebrow" xml:space="preserve">
+    <value>SiNan 控制台</value>
+  </data>
+  <data name="Home.HeroTitle" xml:space="preserve">
+    <value>注册与配置的可视化入口</value>
+  </data>
+  <data name="Home.HeroSubtitle" xml:space="preserve">
+    <value>面向日常运维与研发协作的轻量控制台，聚焦服务发现与配置变更。</value>
+  </data>
+  <data name="Home.Actions.Services" xml:space="preserve">
+    <value>查看服务</value>
+  </data>
+  <data name="Home.Actions.Configs" xml:space="preserve">
+    <value>浏览配置</value>
+  </data>
+  <data name="Home.QuickEntry" xml:space="preserve">
+    <value>快速入口</value>
+  </data>
+  <data name="Home.QuickItem.Services" xml:space="preserve">
+    <value>服务列表与实例状态</value>
+  </data>
+  <data name="Home.QuickItem.Configs" xml:space="preserve">
+    <value>配置版本与历史回溯</value>
+  </data>
+  <data name="Home.QuickItem.Filter" xml:space="preserve">
+    <value>支持 namespace / group 筛选</value>
+  </data>
+  <data name="Home.Card.ServicesTitle" xml:space="preserve">
+    <value>服务视图</value>
+  </data>
+  <data name="Home.Card.ServicesDesc" xml:space="preserve">
+    <value>按命名空间与分组筛选，查看实例与健康状态。</value>
+  </data>
+  <data name="Home.Card.ServicesLink" xml:space="preserve">
+    <value>进入服务</value>
+  </data>
+  <data name="Home.Card.ConfigsTitle" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="Home.Card.ConfigsDesc" xml:space="preserve">
+    <value>浏览配置项、版本变更与发布记录。</value>
+  </data>
+  <data name="Home.Card.ConfigsLink" xml:space="preserve">
+    <value>进入配置</value>
+  </data>
+  <data name="Home.Card.RuntimeTitle" xml:space="preserve">
+    <value>运行说明</value>
+  </data>
+  <data name="Home.Card.RuntimeDesc" xml:space="preserve">
+    <value>需要先启动 SiNan.Server，控制台会自动拉取数据。</value>
+  </data>
+  <data name="Services.Eyebrow" xml:space="preserve">
+    <value>注册中心</value>
+  </data>
+  <data name="Services.Title" xml:space="preserve">
+    <value>服务列表</value>
+  </data>
+  <data name="Services.Subtitle" xml:space="preserve">
+    <value>按命名空间与分组筛选服务，点击查看实例。</value>
+  </data>
+  <data name="ServicesDetails.Eyebrow" xml:space="preserve">
+    <value>注册中心</value>
+  </data>
+  <data name="ServicesDetails.Title" xml:space="preserve">
+    <value>{0} 实例</value>
+  </data>
+  <data name="ServicesDetails.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
+  <data name="Configs.Eyebrow" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="Configs.Title" xml:space="preserve">
+    <value>配置列表</value>
+  </data>
+  <data name="Configs.Subtitle" xml:space="preserve">
+    <value>查看配置项和版本号，点击查看详情。</value>
+  </data>
+  <data name="ConfigDetails.Eyebrow" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="ConfigDetails.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
+  <data name="CreateConfig.Eyebrow" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="CreateConfig.Title" xml:space="preserve">
+    <value>新建配置</value>
+  </data>
+  <data name="CreateConfig.Subtitle" xml:space="preserve">
+    <value>创建新的配置项并发布。</value>
+  </data>
+  <data name="Audit.Eyebrow" xml:space="preserve">
+    <value>审计</value>
+  </data>
+  <data name="Audit.Title" xml:space="preserve">
+    <value>审计日志</value>
+  </data>
+  <data name="Audit.Subtitle" xml:space="preserve">
+    <value>展示最近的操作记录（需要管理员 Token）。</value>
+  </data>
+  <data name="Action.Search" xml:space="preserve">
+    <value>查询</value>
+  </data>
+  <data name="Action.Instances" xml:space="preserve">
+    <value>实例</value>
+  </data>
+  <data name="Action.Details" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="Action.CreateConfig" xml:space="preserve">
+    <value>新建配置</value>
+  </data>
+  <data name="Action.BackToServices" xml:space="preserve">
+    <value>返回服务列表</value>
+  </data>
+  <data name="Action.BackToConfigs" xml:space="preserve">
+    <value>返回配置列表</value>
+  </data>
+  <data name="Action.PublishUpdate" xml:space="preserve">
+    <value>发布更新</value>
+  </data>
+  <data name="Action.DeleteConfig" xml:space="preserve">
+    <value>删除配置</value>
+  </data>
+  <data name="Action.Rollback" xml:space="preserve">
+    <value>回滚</value>
+  </data>
+  <data name="Action.CreatePublish" xml:space="preserve">
+    <value>创建并发布</value>
+  </data>
+  <data name="Panel.Services" xml:space="preserve">
+    <value>服务</value>
+  </data>
+  <data name="Panel.Instances" xml:space="preserve">
+    <value>实例</value>
+  </data>
+  <data name="Panel.ConfigItems" xml:space="preserve">
+    <value>配置项</value>
+  </data>
+  <data name="Panel.CurrentConfig" xml:space="preserve">
+    <value>当前配置</value>
+  </data>
+  <data name="Panel.EditPublish" xml:space="preserve">
+    <value>编辑与发布</value>
+  </data>
+  <data name="Panel.History" xml:space="preserve">
+    <value>版本历史</value>
+  </data>
+  <data name="Panel.ConfigContent" xml:space="preserve">
+    <value>配置内容</value>
+  </data>
+  <data name="Panel.Recent" xml:space="preserve">
+    <value>最近记录</value>
+  </data>
+  <data name="Label.Namespace" xml:space="preserve">
+    <value>Namespace</value>
+  </data>
+  <data name="Label.Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Label.Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Label.ContentType" xml:space="preserve">
+    <value>ContentType</value>
+  </data>
+  <data name="Label.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Label.PublishedAt" xml:space="preserve">
+    <value>PublishedAt</value>
+  </data>
+  <data name="Label.PublishedBy" xml:space="preserve">
+    <value>PublishedBy</value>
+  </data>
+  <data name="Label.Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Label.Token" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="Label.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Label.Resource" xml:space="preserve">
+    <value>Resource</value>
+  </data>
+  <data name="Label.Take" xml:space="preserve">
+    <value>Take</value>
+  </data>
+  <data name="Label.FromUtc" xml:space="preserve">
+    <value>From (UTC)</value>
+  </data>
+  <data name="Label.ToUtc" xml:space="preserve">
+    <value>To (UTC)</value>
+  </data>
+  <data name="Table.ServiceName" xml:space="preserve">
+    <value>服务名</value>
+  </data>
+  <data name="Table.Instances" xml:space="preserve">
+    <value>实例</value>
+  </data>
+  <data name="Table.Healthy" xml:space="preserve">
+    <value>健康</value>
+  </data>
+  <data name="Table.UpdatedAt" xml:space="preserve">
+    <value>更新时间</value>
+  </data>
+  <data name="Table.InstanceId" xml:space="preserve">
+    <value>实例 ID</value>
+  </data>
+  <data name="Table.Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Table.Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Table.Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="Table.Ttl" xml:space="preserve">
+    <value>TTL</value>
+  </data>
+  <data name="Table.Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Table.ContentType" xml:space="preserve">
+    <value>ContentType</value>
+  </data>
+  <data name="Table.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Table.PublishedAt" xml:space="preserve">
+    <value>PublishedAt</value>
+  </data>
+  <data name="Table.PublishedBy" xml:space="preserve">
+    <value>PublishedBy</value>
+  </data>
+  <data name="Table.Time" xml:space="preserve">
+    <value>时间</value>
+  </data>
+  <data name="Table.Actor" xml:space="preserve">
+    <value>Actor</value>
+  </data>
+  <data name="Table.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Table.Resource" xml:space="preserve">
+    <value>Resource</value>
+  </data>
+  <data name="Table.Trace" xml:space="preserve">
+    <value>Trace</value>
+  </data>
+  <data name="Empty.Services" xml:space="preserve">
+    <value>暂无服务</value>
+  </data>
+  <data name="Empty.Instances" xml:space="preserve">
+    <value>暂无实例</value>
+  </data>
+  <data name="Empty.Configs" xml:space="preserve">
+    <value>暂无配置</value>
+  </data>
+  <data name="Empty.History" xml:space="preserve">
+    <value>暂无历史</value>
+  </data>
+  <data name="Empty.Audit" xml:space="preserve">
+    <value>暂无数据</value>
+  </data>
+  <data name="Value.Healthy" xml:space="preserve">
+    <value>健康</value>
+  </data>
+  <data name="Value.Unhealthy" xml:space="preserve">
+    <value>不健康</value>
+  </data>
+  <data name="Privacy.Body" xml:space="preserve">
+    <value>在此页说明你的站点隐私政策。</value>
+  </data>
+  <data name="Error.Heading" xml:space="preserve">
+    <value>错误。</value>
+  </data>
+  <data name="Error.Subheading" xml:space="preserve">
+    <value>处理你的请求时发生错误。</value>
+  </data>
+  <data name="Error.RequestId" xml:space="preserve">
+    <value>请求 ID:</value>
+  </data>
+  <data name="Error.DevModeTitle" xml:space="preserve">
+    <value>开发模式</value>
+  </data>
+  <data name="Error.DevModeBody1" xml:space="preserve">
+    <value>切换到开发环境会显示错误的详细信息。</value>
+  </data>
+  <data name="Error.DevModeBody2" xml:space="preserve">
+    <value>生产环境不应启用开发模式。</value>
+  </data>
+  <data name="Error.DevModeBody3" xml:space="preserve">
+    <value>本地调试时，请将 ASPNETCORE_ENVIRONMENT 环境变量设置为 Development 并重启应用。</value>
+  </data>
+  <data name="Auth.Login" xml:space="preserve">
+    <value>登录</value>
+  </data>
+  <data name="Auth.LoginSubtitle" xml:space="preserve">
+    <value>请先登录后访问控制台。</value>
+  </data>
+  <data name="Auth.LoginPanel" xml:space="preserve">
+    <value>账号</value>
+  </data>
+  <data name="Auth.UserName" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="Auth.Password" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="Auth.SignIn" xml:space="preserve">
+    <value>登录</value>
+  </data>
+  <data name="Auth.Logout" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Auth.UserLabel" xml:space="preserve">
+    <value>用户:</value>
+  </data>
+  <data name="Auth.MissingCredentials" xml:space="preserve">
+    <value>请输入用户名和密码。</value>
+  </data>
+  <data name="Auth.InvalidCredentials" xml:space="preserve">
+    <value>用户名或密码错误。</value>
+  </data>
+</root>

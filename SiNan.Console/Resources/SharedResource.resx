@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Brand.Name" xml:space="preserve">
+    <value>SiNan Console</value>
+  </data>
+  <data name="Nav.Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Nav.Services" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="Nav.Configs" xml:space="preserve">
+    <value>Configs</value>
+  </data>
+  <data name="Nav.Audit" xml:space="preserve">
+    <value>Audit</value>
+  </data>
+  <data name="Nav.Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Nav.Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Nav.LanguageEn" xml:space="preserve">
+    <value>EN</value>
+  </data>
+  <data name="Nav.LanguageZh" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="Title.Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Title.Services" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="Title.ServiceInstances" xml:space="preserve">
+    <value>Service Instances</value>
+  </data>
+  <data name="Title.Configs" xml:space="preserve">
+    <value>Configs</value>
+  </data>
+  <data name="Title.ConfigDetails" xml:space="preserve">
+    <value>Config Details</value>
+  </data>
+  <data name="Title.CreateConfig" xml:space="preserve">
+    <value>Create Config</value>
+  </data>
+  <data name="Title.Audit" xml:space="preserve">
+    <value>Audit</value>
+  </data>
+  <data name="Title.Privacy" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="Title.Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Home.Eyebrow" xml:space="preserve">
+    <value>SiNan Console</value>
+  </data>
+  <data name="Home.HeroTitle" xml:space="preserve">
+    <value>Visual gateway for registration and configuration</value>
+  </data>
+  <data name="Home.HeroSubtitle" xml:space="preserve">
+    <value>Lightweight console for ops and dev collaboration, focused on service discovery and configuration changes.</value>
+  </data>
+  <data name="Home.Actions.Services" xml:space="preserve">
+    <value>View services</value>
+  </data>
+  <data name="Home.Actions.Configs" xml:space="preserve">
+    <value>Browse configs</value>
+  </data>
+  <data name="Home.QuickEntry" xml:space="preserve">
+    <value>Quick entry</value>
+  </data>
+  <data name="Home.QuickItem.Services" xml:space="preserve">
+    <value>Service list and instance status</value>
+  </data>
+  <data name="Home.QuickItem.Configs" xml:space="preserve">
+    <value>Config versions and history</value>
+  </data>
+  <data name="Home.QuickItem.Filter" xml:space="preserve">
+    <value>Supports namespace / group filtering</value>
+  </data>
+  <data name="Home.Card.ServicesTitle" xml:space="preserve">
+    <value>Service view</value>
+  </data>
+  <data name="Home.Card.ServicesDesc" xml:space="preserve">
+    <value>Filter by namespace and group, view instances and health.</value>
+  </data>
+  <data name="Home.Card.ServicesLink" xml:space="preserve">
+    <value>Open services</value>
+  </data>
+  <data name="Home.Card.ConfigsTitle" xml:space="preserve">
+    <value>Configuration center</value>
+  </data>
+  <data name="Home.Card.ConfigsDesc" xml:space="preserve">
+    <value>Browse config items, version changes, and releases.</value>
+  </data>
+  <data name="Home.Card.ConfigsLink" xml:space="preserve">
+    <value>Open configs</value>
+  </data>
+  <data name="Home.Card.RuntimeTitle" xml:space="preserve">
+    <value>Runtime note</value>
+  </data>
+  <data name="Home.Card.RuntimeDesc" xml:space="preserve">
+    <value>Start SiNan.Server first; the console pulls data automatically.</value>
+  </data>
+  <data name="Services.Eyebrow" xml:space="preserve">
+    <value>Registry</value>
+  </data>
+  <data name="Services.Title" xml:space="preserve">
+    <value>Service list</value>
+  </data>
+  <data name="Services.Subtitle" xml:space="preserve">
+    <value>Filter by namespace and group, click to view instances.</value>
+  </data>
+  <data name="ServicesDetails.Eyebrow" xml:space="preserve">
+    <value>Registry</value>
+  </data>
+  <data name="ServicesDetails.Title" xml:space="preserve">
+    <value>{0} instances</value>
+  </data>
+  <data name="ServicesDetails.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
+  <data name="Configs.Eyebrow" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="Configs.Title" xml:space="preserve">
+    <value>Config list</value>
+  </data>
+  <data name="Configs.Subtitle" xml:space="preserve">
+    <value>View config items and versions; click for details.</value>
+  </data>
+  <data name="ConfigDetails.Eyebrow" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="ConfigDetails.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
+  <data name="CreateConfig.Eyebrow" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="CreateConfig.Title" xml:space="preserve">
+    <value>Create config</value>
+  </data>
+  <data name="CreateConfig.Subtitle" xml:space="preserve">
+    <value>Create a new config item and publish.</value>
+  </data>
+  <data name="Audit.Eyebrow" xml:space="preserve">
+    <value>Audit</value>
+  </data>
+  <data name="Audit.Title" xml:space="preserve">
+    <value>Audit logs</value>
+  </data>
+  <data name="Audit.Subtitle" xml:space="preserve">
+    <value>Shows recent operations (admin token required).</value>
+  </data>
+  <data name="Action.Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Action.Instances" xml:space="preserve">
+    <value>Instances</value>
+  </data>
+  <data name="Action.Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Action.CreateConfig" xml:space="preserve">
+    <value>New config</value>
+  </data>
+  <data name="Action.BackToServices" xml:space="preserve">
+    <value>Back to services</value>
+  </data>
+  <data name="Action.BackToConfigs" xml:space="preserve">
+    <value>Back to configs</value>
+  </data>
+  <data name="Action.PublishUpdate" xml:space="preserve">
+    <value>Publish update</value>
+  </data>
+  <data name="Action.DeleteConfig" xml:space="preserve">
+    <value>Delete config</value>
+  </data>
+  <data name="Action.Rollback" xml:space="preserve">
+    <value>Rollback</value>
+  </data>
+  <data name="Action.CreatePublish" xml:space="preserve">
+    <value>Create and publish</value>
+  </data>
+  <data name="Panel.Services" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="Panel.Instances" xml:space="preserve">
+    <value>Instances</value>
+  </data>
+  <data name="Panel.ConfigItems" xml:space="preserve">
+    <value>Config items</value>
+  </data>
+  <data name="Panel.CurrentConfig" xml:space="preserve">
+    <value>Current config</value>
+  </data>
+  <data name="Panel.EditPublish" xml:space="preserve">
+    <value>Edit and publish</value>
+  </data>
+  <data name="Panel.History" xml:space="preserve">
+    <value>Version history</value>
+  </data>
+  <data name="Panel.ConfigContent" xml:space="preserve">
+    <value>Config content</value>
+  </data>
+  <data name="Panel.Recent" xml:space="preserve">
+    <value>Recent records</value>
+  </data>
+  <data name="Label.Namespace" xml:space="preserve">
+    <value>Namespace</value>
+  </data>
+  <data name="Label.Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Label.Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Label.ContentType" xml:space="preserve">
+    <value>ContentType</value>
+  </data>
+  <data name="Label.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Label.PublishedAt" xml:space="preserve">
+    <value>PublishedAt</value>
+  </data>
+  <data name="Label.PublishedBy" xml:space="preserve">
+    <value>PublishedBy</value>
+  </data>
+  <data name="Label.Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Label.Token" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="Label.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Label.Resource" xml:space="preserve">
+    <value>Resource</value>
+  </data>
+  <data name="Label.Take" xml:space="preserve">
+    <value>Take</value>
+  </data>
+  <data name="Label.FromUtc" xml:space="preserve">
+    <value>From (UTC)</value>
+  </data>
+  <data name="Label.ToUtc" xml:space="preserve">
+    <value>To (UTC)</value>
+  </data>
+  <data name="Table.ServiceName" xml:space="preserve">
+    <value>Service name</value>
+  </data>
+  <data name="Table.Instances" xml:space="preserve">
+    <value>Instances</value>
+  </data>
+  <data name="Table.Healthy" xml:space="preserve">
+    <value>Healthy</value>
+  </data>
+  <data name="Table.UpdatedAt" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="Table.InstanceId" xml:space="preserve">
+    <value>Instance ID</value>
+  </data>
+  <data name="Table.Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Table.Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Table.Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="Table.Ttl" xml:space="preserve">
+    <value>TTL</value>
+  </data>
+  <data name="Table.Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Table.ContentType" xml:space="preserve">
+    <value>ContentType</value>
+  </data>
+  <data name="Table.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Table.PublishedAt" xml:space="preserve">
+    <value>PublishedAt</value>
+  </data>
+  <data name="Table.PublishedBy" xml:space="preserve">
+    <value>PublishedBy</value>
+  </data>
+  <data name="Table.Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Table.Actor" xml:space="preserve">
+    <value>Actor</value>
+  </data>
+  <data name="Table.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Table.Resource" xml:space="preserve">
+    <value>Resource</value>
+  </data>
+  <data name="Table.Trace" xml:space="preserve">
+    <value>Trace</value>
+  </data>
+  <data name="Empty.Services" xml:space="preserve">
+    <value>No services</value>
+  </data>
+  <data name="Empty.Instances" xml:space="preserve">
+    <value>No instances</value>
+  </data>
+  <data name="Empty.Configs" xml:space="preserve">
+    <value>No configs</value>
+  </data>
+  <data name="Empty.History" xml:space="preserve">
+    <value>No history</value>
+  </data>
+  <data name="Empty.Audit" xml:space="preserve">
+    <value>No data</value>
+  </data>
+  <data name="Value.Healthy" xml:space="preserve">
+    <value>Healthy</value>
+  </data>
+  <data name="Value.Unhealthy" xml:space="preserve">
+    <value>Unhealthy</value>
+  </data>
+  <data name="Privacy.Body" xml:space="preserve">
+    <value>Use this page to detail your site's privacy policy.</value>
+  </data>
+  <data name="Error.Heading" xml:space="preserve">
+    <value>Error.</value>
+  </data>
+  <data name="Error.Subheading" xml:space="preserve">
+    <value>An error occurred while processing your request.</value>
+  </data>
+  <data name="Error.RequestId" xml:space="preserve">
+    <value>Request ID:</value>
+  </data>
+  <data name="Error.DevModeTitle" xml:space="preserve">
+    <value>Development Mode</value>
+  </data>
+  <data name="Error.DevModeBody1" xml:space="preserve">
+    <value>Swapping to the Development environment displays detailed information about the error that occurred.</value>
+  </data>
+  <data name="Error.DevModeBody2" xml:space="preserve">
+    <value>The Development environment shouldn't be enabled for deployed applications.</value>
+  </data>
+  <data name="Error.DevModeBody3" xml:space="preserve">
+    <value>For local debugging, enable the Development environment by setting the ASPNETCORE_ENVIRONMENT environment variable to Development and restarting the app.</value>
+  </data>
+  <data name="Auth.Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Auth.LoginSubtitle" xml:space="preserve">
+    <value>Sign in to access the console.</value>
+  </data>
+  <data name="Auth.LoginPanel" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Auth.UserName" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Auth.Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Auth.SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Auth.Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Auth.UserLabel" xml:space="preserve">
+    <value>User:</value>
+  </data>
+  <data name="Auth.MissingCredentials" xml:space="preserve">
+    <value>Missing username or password.</value>
+  </data>
+  <data name="Auth.InvalidCredentials" xml:space="preserve">
+    <value>Invalid username or password.</value>
+  </data>
+</root>

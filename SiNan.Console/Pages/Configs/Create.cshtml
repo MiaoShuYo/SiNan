@@ -1,16 +1,16 @@
 @page
 @model SiNan.Console.Pages.Configs.CreateModel
 @{
-    ViewData["Title"] = "Create Config";
+    ViewData["Title"] = L["Title.CreateConfig"];
 }
 
 <section class="page-header">
     <div>
-        <p class="eyebrow">Config</p>
-        <h1>新建配置</h1>
-        <p class="muted">创建新的配置项并发布。</p>
+        <p class="eyebrow">@L["CreateConfig.Eyebrow"]</p>
+        <h1>@L["CreateConfig.Title"]</h1>
+        <p class="muted">@L["CreateConfig.Subtitle"]</p>
     </div>
-    <a class="btn btn-outline-secondary" asp-page="/Configs/Index">返回配置列表</a>
+    <a class="btn btn-outline-secondary" asp-page="/Configs/Index">@L["Action.BackToConfigs"]</a>
 </section>
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -19,38 +19,38 @@
 }
 
 <div class="panel">
-    <div class="panel-title">配置内容</div>
+    <div class="panel-title">@L["Panel.ConfigContent"]</div>
     <form method="post" class="config-form">
         <div class="form-grid">
             <div>
-                <label class="form-label">Namespace</label>
+                <label class="form-label">@L["Label.Namespace"]</label>
                 <input class="form-control" name="namespace" value="@Model.Namespace" placeholder="default" />
             </div>
             <div>
-                <label class="form-label">Group</label>
+                <label class="form-label">@L["Label.Group"]</label>
                 <input class="form-control" name="group" value="@Model.Group" placeholder="DEFAULT_GROUP" />
             </div>
             <div>
-                <label class="form-label">Key</label>
+                <label class="form-label">@L["Label.Key"]</label>
                 <input class="form-control" name="key" value="@Model.Key" placeholder="orders.timeout" />
             </div>
             <div>
-                <label class="form-label">ContentType</label>
+                <label class="form-label">@L["Label.ContentType"]</label>
                 <input class="form-control" name="contentType" value="@Model.ContentType" placeholder="text/plain" />
             </div>
             <div>
-                <label class="form-label">PublishedBy</label>
+                <label class="form-label">@L["Label.PublishedBy"]</label>
                 <input class="form-control" name="publishedBy" value="@Model.PublishedBy" placeholder="operator" />
             </div>
             <div>
-                <label class="form-label">Token</label>
+                <label class="form-label">@L["Label.Token"]</label>
                 <input class="form-control" name="token" value="@Model.Token" placeholder="X-SiNan-Token" />
             </div>
         </div>
         <div>
-            <label class="form-label">Content</label>
+            <label class="form-label">@L["Label.Content"]</label>
             <textarea class="form-control" name="content" rows="10">@Model.Content</textarea>
         </div>
-        <button class="btn btn-primary" type="submit">创建并发布</button>
+        <button class="btn btn-primary" type="submit">@L["Action.CreatePublish"]</button>
     </form>
 </div>

@@ -1,16 +1,16 @@
 @page
 @model SiNan.Console.Pages.Configs.DetailsModel
 @{
-    ViewData["Title"] = "Config Details";
+    ViewData["Title"] = L["Title.ConfigDetails"];
 }
 
 <section class="page-header">
     <div>
-        <p class="eyebrow">Config</p>
+        <p class="eyebrow">@L["ConfigDetails.Eyebrow"]</p>
         <h1>@Model.Key</h1>
-        <p class="muted">Namespace: @Model.Namespace / Group: @Model.Group</p>
+        <p class="muted">@L["ConfigDetails.Meta", Model.Namespace, Model.Group]</p>
     </div>
-    <a class="btn btn-outline-secondary" asp-page="/Configs/Index">返回配置列表</a>
+    <a class="btn btn-outline-secondary" asp-page="/Configs/Index">@L["Action.BackToConfigs"]</a>
 </section>
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -21,22 +21,22 @@
 @if (Model.Item is not null)
 {
     <div class="panel">
-        <div class="panel-title">当前配置</div>
+        <div class="panel-title">@L["Panel.CurrentConfig"]</div>
         <div class="kv-grid">
             <div>
-                <span class="label">ContentType</span>
+                <span class="label">@L["Label.ContentType"]</span>
                 <div class="value">@Model.Item.ContentType</div>
             </div>
             <div>
-                <span class="label">Version</span>
+                <span class="label">@L["Label.Version"]</span>
                 <div class="value">@Model.Item.Version</div>
             </div>
             <div>
-                <span class="label">PublishedAt</span>
+                <span class="label">@L["Label.PublishedAt"]</span>
                 <div class="value">@(Model.Item.PublishedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") ?? "-")</div>
             </div>
             <div>
-                <span class="label">PublishedBy</span>
+                <span class="label">@L["Label.PublishedBy"]</span>
                 <div class="value">@(Model.Item.PublishedBy ?? "-")</div>
             </div>
         </div>
@@ -47,45 +47,45 @@
 }
 
 <div class="panel">
-    <div class="panel-title">编辑与发布</div>
+    <div class="panel-title">@L["Panel.EditPublish"]</div>
     <form method="post" asp-page-handler="Update" class="config-form">
         <input type="hidden" name="namespace" value="@Model.Namespace" />
         <input type="hidden" name="group" value="@Model.Group" />
         <input type="hidden" name="key" value="@Model.Key" />
         <div class="form-grid">
             <div>
-                <label class="form-label">Token</label>
+                <label class="form-label">@L["Label.Token"]</label>
                 <input class="form-control" name="token" value="@Model.Token" placeholder="X-SiNan-Token" />
             </div>
             <div>
-                <label class="form-label">PublishedBy</label>
+                <label class="form-label">@L["Label.PublishedBy"]</label>
                 <input class="form-control" name="publishedBy" value="@Model.PublishedBy" placeholder="operator" />
             </div>
             <div>
-                <label class="form-label">ContentType</label>
+                <label class="form-label">@L["Label.ContentType"]</label>
                 <input class="form-control" name="contentType" value="@Model.ContentType" placeholder="text/plain" />
             </div>
         </div>
         <div>
-            <label class="form-label">Content</label>
+            <label class="form-label">@L["Label.Content"]</label>
             <textarea class="form-control" name="content" rows="8">@Model.Content</textarea>
         </div>
         <div class="action-row">
-            <button class="btn btn-primary" type="submit">发布更新</button>
-            <button class="btn btn-outline-danger" type="submit" formaction="?handler=Delete">删除配置</button>
+            <button class="btn btn-primary" type="submit">@L["Action.PublishUpdate"]</button>
+            <button class="btn btn-outline-danger" type="submit" formaction="?handler=Delete">@L["Action.DeleteConfig"]</button>
         </div>
     </form>
 </div>
 
 <div class="panel">
-    <div class="panel-title">版本历史</div>
+    <div class="panel-title">@L["Panel.History"]</div>
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
                 <tr>
-                    <th>Version</th>
-                    <th>PublishedAt</th>
-                    <th>PublishedBy</th>
+                    <th>@L["Table.Version"]</th>
+                    <th>@L["Table.PublishedAt"]</th>
+                    <th>@L["Table.PublishedBy"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -93,7 +93,7 @@
             @if (Model.History.Count == 0)
             {
                 <tr>
-                    <td colspan="3" class="text-muted">暂无历史</td>
+                    <td colspan="3" class="text-muted">@L["Empty.History"]</td>
                 </tr>
             }
             else
@@ -112,7 +112,7 @@
                                 <input type="hidden" name="version" value="@item.Version" />
                                 <input type="hidden" name="token" value="@Model.Token" />
                                 <input type="hidden" name="publishedBy" value="@Model.PublishedBy" />
-                                <button class="btn btn-sm btn-outline-primary" type="submit">回滚</button>
+                                <button class="btn btn-sm btn-outline-primary" type="submit">@L["Action.Rollback"]</button>
                             </form>
                         </td>
                     </tr>

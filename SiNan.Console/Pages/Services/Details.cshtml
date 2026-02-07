@@ -1,16 +1,16 @@
 @page
 @model SiNan.Console.Pages.Services.DetailsModel
 @{
-    ViewData["Title"] = "Service Instances";
+    ViewData["Title"] = L["Title.ServiceInstances"];
 }
 
 <section class="page-header">
     <div>
-        <p class="eyebrow">Registry</p>
-        <h1>@Model.ServiceName 实例</h1>
-        <p class="muted">Namespace: @Model.Namespace / Group: @Model.Group</p>
+        <p class="eyebrow">@L["ServicesDetails.Eyebrow"]</p>
+        <h1>@L["ServicesDetails.Title", Model.ServiceName]</h1>
+        <p class="muted">@L["ServicesDetails.Meta", Model.Namespace, Model.Group]</p>
     </div>
-    <a class="btn btn-outline-secondary" asp-page="/Services/Index">返回服务列表</a>
+    <a class="btn btn-outline-secondary" asp-page="/Services/Index">@L["Action.BackToServices"]</a>
 </section>
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -19,24 +19,24 @@
 }
 
 <div class="panel">
-    <div class="panel-title">实例</div>
+    <div class="panel-title">@L["Panel.Instances"]</div>
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
                 <tr>
-                    <th>实例 ID</th>
-                    <th>Host</th>
-                    <th>Port</th>
-                    <th>Weight</th>
-                    <th>Healthy</th>
-                    <th>TTL</th>
+                    <th>@L["Table.InstanceId"]</th>
+                    <th>@L["Table.Host"]</th>
+                    <th>@L["Table.Port"]</th>
+                    <th>@L["Table.Weight"]</th>
+                    <th>@L["Table.Healthy"]</th>
+                    <th>@L["Table.Ttl"]</th>
                 </tr>
             </thead>
             <tbody>
             @if (Model.Instances.Count == 0)
             {
                 <tr>
-                    <td colspan="6" class="text-muted">暂无实例</td>
+                    <td colspan="6" class="text-muted">@L["Empty.Instances"]</td>
                 </tr>
             }
             else
@@ -48,7 +48,7 @@
                         <td>@instance.Host</td>
                         <td>@instance.Port</td>
                         <td>@instance.Weight</td>
-                        <td>@(instance.Healthy ? "Healthy" : "Unhealthy")</td>
+                        <td>@(instance.Healthy ? L["Value.Healthy"] : L["Value.Unhealthy"])</td>
                         <td>@instance.TtlSeconds</td>
                     </tr>
                 }
