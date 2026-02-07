@@ -1177,104 +1177,102 @@ app.MapGet("/weatherforecast", () =>
 
 app.Run();
 
+static string BuildServiceKey(string @namespace, string group, string serviceName)
+{
+    return $"{@namespace}::{group}::{serviceName}";
+}
+
+static string BuildEtag(ServiceEntity service, IReadOnlyList<ServiceInstanceEntity> instances)
+{
+    var latestUpdate = instances.Count == 0
+        ? service.UpdatedAt
+        : instances.Max(i => i.UpdatedAt);
+    return $"\"{service.Id}:{latestUpdate.ToUnixTimeMilliseconds()}:{instances.Count}\"";
+}
+
+static ServiceInstancesResponse BuildInstancesResponse(
+    string @namespace,
+    string group,
+    string serviceName,
+    IReadOnlyList<ServiceInstanceEntity> instances,
+    string etagValue)
+{
+    return new ServiceInstancesResponse
+    {
+        Namespace = @namespace,
+        Group = group,
+        ServiceName = serviceName,
+        ETag = etagValue,
+        Instances = instances.Select(instance => new ServiceInstanceDto
+        {
+            InstanceId = instance.InstanceId,
+            Host = instance.Host,
+            Port = instance.Port,
+            Weight = instance.Weight,
+            Healthy = instance.Healthy,
+            TtlSeconds = instance.TtlSeconds,
+            IsEphemeral = instance.IsEphemeral,
+            Metadata = MetadataParser.Parse(instance.MetadataJson)
+        }).ToList()
+    };
+}
+
+static ConfigItemResponse ToConfigItemResponse(ConfigItemEntity config)
+{
+    return new ConfigItemResponse
+    {
+        Namespace = config.Namespace,
+        Group = config.Group,
+        Key = config.Key,
+        Content = config.Content,
+        ContentType = config.ContentType,
+        Version = config.Version,
+        PublishedAt = config.PublishedAt,
+        PublishedBy = config.PublishedBy,
+        UpdatedAt = config.UpdatedAt
+    };
+}
+
+static bool ValidateConfigContentQuota(QuotaOptions options, string content, out string message)
+{
+    var maxLength = options.MaxConfigContentLength;
+    if (maxLength > 0 && content.Length > maxLength)
+    {
+        message = "Config content length exceeds quota.";
+        return false;
+    }
+
+    message = string.Empty;
+    return true;
+}
+
+static string BuildConfigKey(string @namespace, string group, string key)
+{
+    return $"{@namespace}::{group}::{key}";
+}
+
+static string BuildConfigEtag(ConfigItemEntity config)
+{
+    var publishedAt = config.PublishedAt?.ToUnixTimeMilliseconds() ?? 0;
+    return $"\"{config.Id}:{config.Version}:{publishedAt}\"";
+}
+
+static IResult Error(HttpContext context, string code, string message, int statusCode, object? details = null)
+{
+    return Results.Json(new ErrorResponse
+    {
+        Code = code,
+        Message = message,
+        Details = details,
+        TraceId = context.TraceIdentifier
+    }, statusCode: statusCode);
+}
+
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 
-namespace SiNan.Server
+public partial class Program
 {
-    public partial class Program
-    {
-        static string BuildServiceKey(string @namespace, string group, string serviceName)
-        {
-            return $"{@namespace}::{group}::{serviceName}";
-        }
-
-        static string BuildEtag(ServiceEntity service, IReadOnlyList<ServiceInstanceEntity> instances)
-        {
-            var latestUpdate = instances.Count == 0
-                ? service.UpdatedAt
-                : instances.Max(i => i.UpdatedAt);
-            return $"\"{service.Id}:{latestUpdate.ToUnixTimeMilliseconds()}:{instances.Count}\"";
-        }
-
-        static ServiceInstancesResponse BuildInstancesResponse(
-            string @namespace,
-            string group,
-            string serviceName,
-            IReadOnlyList<ServiceInstanceEntity> instances,
-            string etagValue)
-        {
-            return new ServiceInstancesResponse
-            {
-                Namespace = @namespace,
-                Group = group,
-                ServiceName = serviceName,
-                ETag = etagValue,
-                Instances = instances.Select(instance => new ServiceInstanceDto
-                {
-                    InstanceId = instance.InstanceId,
-                    Host = instance.Host,
-                    Port = instance.Port,
-                    Weight = instance.Weight,
-                    Healthy = instance.Healthy,
-                    TtlSeconds = instance.TtlSeconds,
-                    IsEphemeral = instance.IsEphemeral,
-                    Metadata = MetadataParser.Parse(instance.MetadataJson)
-                }).ToList()
-            };
-        }
-
-        static ConfigItemResponse ToConfigItemResponse(ConfigItemEntity config)
-        {
-            return new ConfigItemResponse
-            {
-                Namespace = config.Namespace,
-                Group = config.Group,
-                Key = config.Key,
-                Content = config.Content,
-                ContentType = config.ContentType,
-                Version = config.Version,
-                PublishedAt = config.PublishedAt,
-                PublishedBy = config.PublishedBy,
-                UpdatedAt = config.UpdatedAt
-            };
-        }
-
-        static bool ValidateConfigContentQuota(QuotaOptions options, string content, out string message)
-        {
-            var maxLength = options.MaxConfigContentLength;
-            if (maxLength > 0 && content.Length > maxLength)
-            {
-                message = "Config content length exceeds quota.";
-                return false;
-            }
-
-            message = string.Empty;
-            return true;
-        }
-
-        static string BuildConfigKey(string @namespace, string group, string key)
-        {
-            return $"{@namespace}::{group}::{key}";
-        }
-
-        static string BuildConfigEtag(ConfigItemEntity config)
-        {
-            var publishedAt = config.PublishedAt?.ToUnixTimeMilliseconds() ?? 0;
-            return $"\"{config.Id}:{config.Version}:{publishedAt}\"";
-        }
-
-        static IResult Error(HttpContext context, string code, string message, int statusCode, object? details = null)
-        {
-            return Results.Json(new ErrorResponse
-            {
-                Code = code,
-                Message = message,
-                Details = details,
-                TraceId = context.TraceIdentifier
-            }, statusCode: statusCode);
-        }
-    }
 }

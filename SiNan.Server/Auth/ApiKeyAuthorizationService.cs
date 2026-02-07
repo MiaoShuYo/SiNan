@@ -25,8 +25,8 @@ public sealed class ApiKeyAuthorizationService
 
         if (!options.Enabled)
         {
-            var actor = string.IsNullOrWhiteSpace(actorFromHeader) ? "anonymous" : actorFromHeader;
-            return AuthResult.Allow(actor);
+            var fallbackActor = string.IsNullOrWhiteSpace(actorFromHeader) ? "anonymous" : actorFromHeader;
+            return AuthResult.Allow(fallbackActor);
         }
 
         if (!context.Request.Headers.TryGetValue(options.HeaderName, out var tokenValue) || string.IsNullOrWhiteSpace(tokenValue))
@@ -68,8 +68,8 @@ public sealed class ApiKeyAuthorizationService
 
         if (!options.Enabled)
         {
-            var actor = string.IsNullOrWhiteSpace(actorFromHeader) ? "anonymous" : actorFromHeader;
-            return AuthResult.Allow(actor);
+            var fallbackActor = string.IsNullOrWhiteSpace(actorFromHeader) ? "anonymous" : actorFromHeader;
+            return AuthResult.Allow(fallbackActor);
         }
 
         if (!context.Request.Headers.TryGetValue(options.HeaderName, out var tokenValue) || string.IsNullOrWhiteSpace(tokenValue))
@@ -121,8 +121,8 @@ public sealed class ApiKeyAuthorizationService
 
         if (!options.Enabled)
         {
-            var actor = string.IsNullOrWhiteSpace(actorFromHeader) ? "anonymous" : actorFromHeader;
-            return AuthResult.Allow(actor);
+            var fallbackActor = string.IsNullOrWhiteSpace(actorFromHeader) ? "anonymous" : actorFromHeader;
+            return AuthResult.Allow(fallbackActor);
         }
 
         if (!context.Request.Headers.TryGetValue(options.HeaderName, out var tokenValue) || string.IsNullOrWhiteSpace(tokenValue))
