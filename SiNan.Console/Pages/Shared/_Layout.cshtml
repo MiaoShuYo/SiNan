@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="~/SiNan.Console.styles.css" asp-append-version="true" />
 </head>
 <body class="app-body">
+    @{
+        var isLoginPage = Context.Request.Path.StartsWithSegments("/Account/Login", StringComparison.OrdinalIgnoreCase);
+    }
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark app-nav">
             <div class="container">
@@ -24,25 +27,28 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Index">@L["Nav.Overview"]</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Services/Index">@L["Nav.Services"]</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Configs/Index">@L["Nav.Configs"]</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Audit/Index">@L["Nav.Audit"]</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Privacy">@L["Nav.Privacy"]</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav align-items-lg-center">
+                <div class="navbar-collapse collapse d-sm-inline-flex">
+                    @if (!isLoginPage)
+                    {
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Index">@L["Nav.Overview"]</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Services/Index">@L["Nav.Services"]</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Configs/Index">@L["Nav.Configs"]</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Audit/Index">@L["Nav.Audit"]</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Privacy">@L["Nav.Privacy"]</a>
+                            </li>
+                        </ul>
+                    }
+                    <ul class="navbar-nav align-items-lg-center ms-auto">
                         <li class="nav-item">
                             <span class="nav-link small text-uppercase">@L["Nav.Language"]</span>
                         </li>
