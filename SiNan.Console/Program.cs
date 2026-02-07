@@ -153,6 +153,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRequestLocalization(localizationOptions);
 
+app.UseStaticFiles();
+
 app.MapDefaultEndpoints();
 
 app.UseRouting();
@@ -178,8 +180,7 @@ app.MapGet("/culture/set", (string culture, string? returnUrl, HttpContext httpC
     return Results.LocalRedirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
 }).AllowAnonymous();
 
-app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapStaticAssets().AllowAnonymous();
+app.MapRazorPages();
 
 app.Run();

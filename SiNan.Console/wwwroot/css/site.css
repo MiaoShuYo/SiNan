@@ -276,6 +276,7 @@ h1, h2, h3 {
   gap: 1.25rem;
   align-items: center;
   margin-bottom: 2rem;
+  text-align: center!important;
 }
 
 .auth-logo {
@@ -302,7 +303,6 @@ h1, h2, h3 {
 @media (max-width: 576px) {
   .auth-brand {
     grid-template-columns: 1fr;
-    text-align: center;
   }
 
   .auth-logo {

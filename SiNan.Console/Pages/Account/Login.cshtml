@@ -7,12 +7,7 @@
 <div class="auth-shell">
     <div class="auth-card">
         <div class="auth-brand">
-            <img class="auth-logo" src="~/images/logo.svg" alt="SiNan Logo" />
-            <div>
-                <p class="eyebrow">@L["Auth.Login"]</p>
-                <h1 class="auth-title">@L["Auth.Login"]</h1>
-                <p class="muted">@L["Auth.LoginSubtitle"]</p>
-            </div>
+            <img class="auth-logo" src="/images/logo.svg" alt="SiNan Logo" />
         </div>
 
         @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -21,7 +16,6 @@
         }
 
         <div class="auth-panel">
-            <div class="panel-title">@L["Auth.LoginPanel"]</div>
             <form method="post" class="config-form">
                 <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
                 <div class="form-grid auth-grid">
