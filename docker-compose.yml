@@ -37,6 +37,30 @@ services:
       timeout: 5s
       retries: 5
 
+  sinan-console:
+    build:
+      context: .
+      dockerfile: ./SiNan.Console/Dockerfile
+    container_name: sinan-console
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SiNanServer__BaseUrl: "http://sinan-server:8080"
+      ConnectionStrings__ConsoleDb: "Data Source=/data/console-auth.db"
+      Auth__BootstrapAdmin__UserName: "admin"
+      Auth__BootstrapAdmin__Password: "admin123"
+    ports:
+      - "5110:8080"
+    volumes:
+      - console_data:/data
+    depends_on:
+      sinan-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   sinan-server-sqlite:
     profiles:
       - sqlite
@@ -61,3 +85,4 @@ services:
 volumes:
   mysql_data:
   sqlite_data:
+  console_data:

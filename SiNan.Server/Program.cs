@@ -106,6 +106,86 @@ if (!app.Environment.IsDevelopment())
 // Add API key authentication middleware
 app.UseMiddleware<ApiKeyAuthMiddleware>();
 
+// Map root endpoint
+app.MapGet("/", (HttpContext context) =>
+{
+    var accept = context.Request.Headers.Accept.ToString();
+    var isHtmlRequest = accept.Contains("text/html");
+
+    if (isHtmlRequest)
+    {
+        var html = $@"<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>SiNan - Service Registry &amp; Configuration Platform</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }}
+        .container {{ background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px; width: 90%; }}
+        h1 {{ color: #667eea; margin: 0 0 0.5rem 0; font-size: 2.5rem; }}
+        .version {{ color: #999; font-size: 0.9rem; margin-bottom: 1.5rem; }}
+        .description {{ color: #666; margin-bottom: 2rem; line-height: 1.6; }}
+        .endpoints {{ background: #f8f9fa; border-radius: 8px; padding: 1.5rem; }}
+        .endpoints h2 {{ color: #333; margin: 0 0 1rem 0; font-size: 1.2rem; }}
+        .endpoint-list {{ list-style: none; padding: 0; margin: 0; }}
+        .endpoint-list li {{ margin-bottom: 0.75rem; }}
+        .endpoint-list a {{ color: #667eea; text-decoration: none; font-family: 'Courier New', monospace; display: inline-block; padding: 0.5rem 1rem; background: white; border-radius: 4px; transition: all 0.2s; }}
+        .endpoint-list a:hover {{ background: #667eea; color: white; transform: translateX(5px); }}
+        .status {{ margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0; color: #999; font-size: 0.85rem; }}
+        .status-dot {{ display: inline-block; width: 8px; height: 8px; background: #48bb78; border-radius: 50%; margin-right: 0.5rem; animation: pulse 2s infinite; }}
+        @keyframes pulse {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.5; }} 100% {{ opacity: 1; }} }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1>🧭 SiNan</h1>
+        <div class='version'>Version 1.0.0</div>
+        <div class='description'>
+            A modern service registry, discovery, and configuration management platform for distributed systems. Built with .NET 10 and inspired by Nacos.
+        </div>
+        <div class='endpoints'>
+            <h2>📡 API Endpoints</h2>
+            <ul class='endpoint-list'>
+                <li><a href='/health'>/health</a> - Health check</li>
+                <li><a href='/alive'>/alive</a> - Liveness probe</li>
+                {(app.Environment.IsDevelopment() ? "<li><a href='/openapi/v1.json'>/openapi/v1.json</a> - OpenAPI specification</li>" : "")}
+                <li><a href='/api/services'>/api/services</a> - Service registry</li>
+                <li><a href='/api/configs'>/api/configs</a> - Configuration management</li>
+                <li><a href='/api/audit'>/api/audit</a> - Audit logs</li>
+            </ul>
+        </div>
+        <div class='status'>
+            <span class='status-dot'></span>
+            Server is running • {DateTimeOffset.UtcNow:yyyy-MM-dd HH:mm:ss} UTC
+        </div>
+    </div>
+</body>
+</html>";
+        return Results.Content(html, "text/html; charset=utf-8");
+    }
+
+    return Results.Json(new
+    {
+        name = "SiNan",
+        version = "1.0.0",
+        description = "Service Registry, Discovery and Configuration Management Platform",
+        endpoints = new
+        {
+            health = "/health",
+            alive = "/alive",
+            openapi = app.Environment.IsDevelopment() ? "/openapi/v1.json" : null,
+            api = new
+            {
+                services = "/api/services",
+                configs = "/api/configs",
+                audit = "/api/audit"
+            }
+        },
+        timestamp = DateTimeOffset.UtcNow
+    });
+});
+
 // Map controller routes
 app.MapControllers();
 // Map default endpoints (health checks, etc.)
