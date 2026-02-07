@@ -2,34 +2,32 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
-using SiNan.Console.Data;
+using System.Net.Http.Json;
 
 namespace SiNan.Console.Pages.Account;
 
 [AllowAnonymous]
 public class LoginModel : PageModel
 {
-    private readonly ConsoleAuthDbContext _dbContext;
     private readonly IConfiguration _configuration;
     private readonly IWebHostEnvironment _environment;
     private readonly IStringLocalizer<SharedResource> _localizer;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public LoginModel(
-        ConsoleAuthDbContext dbContext,
         IConfiguration configuration,
         IWebHostEnvironment environment,
-        IStringLocalizer<SharedResource> localizer)
+        IStringLocalizer<SharedResource> localizer,
+        IHttpClientFactory httpClientFactory)
     {
-        _dbContext = dbContext;
         _configuration = configuration;
         _environment = environment;
         _localizer = localizer;
+        _httpClientFactory = httpClientFactory;
     }
 
     [BindProperty]
@@ -55,24 +53,45 @@ public class LoginModel : PageModel
             return Page();
         }
 
-        var user = await _dbContext.Users.AsNoTracking()
-            .FirstOrDefaultAsync(u => u.UserName == UserName);
+        var client = _httpClientFactory.CreateClient("SiNanServer");
+        var request = new ConsoleAuthLoginRequest
+        {
+            UserName = UserName,
+            Password = Password
+        };
 
-        if (user is null)
+        HttpResponseMessage response;
+        try
+        {
+            response = await client.PostAsJsonAsync("/api/v1/console-auth/login", request);
+        }
+        catch (TaskCanceledException)
+        {
+            ErrorMessage = "登录超时，请确认服务器可用。";
+            return Page();
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = $"无法连接服务器: {ex.Message}";
+            return Page();
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             ErrorMessage = _localizer["Auth.InvalidCredentials"];
             return Page();
         }
 
-        var hasher = new PasswordHasher<AuthUser>();
-        var result = hasher.VerifyHashedPassword(user, user.PasswordHash, Password);
-        if (result == PasswordVerificationResult.Failed)
+        if (!response.IsSuccessStatusCode)
         {
-            ErrorMessage = _localizer["Auth.InvalidCredentials"];
+            ErrorMessage = $"登录失败: {(int)response.StatusCode} {response.ReasonPhrase}";
             return Page();
         }
 
-        var token = CreateToken(user.UserName);
+        var loginResult = await response.Content.ReadFromJsonAsync<ConsoleAuthLoginResponse>();
+        var userName = loginResult?.UserName ?? UserName;
+
+        var token = CreateToken(userName);
         var cookieName = _configuration["Auth:CookieName"] ?? "sinan_auth";
         var expiresMinutes = int.TryParse(_configuration["Auth:Jwt:ExpiresMinutes"], out var minutes)
             ? minutes
@@ -92,6 +111,18 @@ public class LoginModel : PageModel
         }
 
         return RedirectToPage("/Index");
+    }
+
+    private sealed class ConsoleAuthLoginRequest
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private sealed class ConsoleAuthLoginResponse
+    {
+        public string UserName { get; set; } = string.Empty;
+        public bool IsAdmin { get; set; }
     }
 
     private string CreateToken(string userName)

@@ -3,11 +3,13 @@
 /// Configures services, middleware, and database connections
 /// </summary>
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SiNan.Server.Audit;
 using SiNan.Server.Auth;
 using SiNan.Server.Config;
 using SiNan.Server.Data;
+using SiNan.Server.Data.Entities;
 using SiNan.Server.Quotas;
 using SiNan.Server.Registry;
 using SiNan.Server.Storage;
@@ -82,6 +84,28 @@ using (var scope = app.Services.CreateScope())
         // Apply pending migrations
         dbContext.Database.Migrate();
         app.Logger.LogInformation("Database migrations applied successfully.");
+
+        var bootstrapSection = builder.Configuration.GetSection("ConsoleAuth:BootstrapAdmin");
+        var userName = bootstrapSection["UserName"] ?? "admin";
+        var password = bootstrapSection["Password"] ?? "ChangeMe123!";
+
+        var userExists = dbContext.ConsoleUsers.Any(u => u.UserName == userName);
+        if (!userExists)
+        {
+            var hasher = new PasswordHasher<ConsoleUserEntity>();
+            var user = new ConsoleUserEntity
+            {
+                Id = Guid.NewGuid(),
+                UserName = userName,
+                IsAdmin = true,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+
+            user.PasswordHash = hasher.HashPassword(user, password);
+            dbContext.ConsoleUsers.Add(user);
+            dbContext.SaveChanges();
+        }
     }
     catch (Exception ex)
     {

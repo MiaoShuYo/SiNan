@@ -14,6 +14,7 @@ public sealed class SiNanDbContext : DbContext
     public DbSet<ConfigItemEntity> ConfigItems => Set<ConfigItemEntity>();
     public DbSet<ConfigHistoryEntity> ConfigHistory => Set<ConfigHistoryEntity>();
     public DbSet<AuditLogEntity> AuditLogs => Set<AuditLogEntity>();
+    public DbSet<ConsoleUserEntity> ConsoleUsers => Set<ConsoleUserEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -103,6 +104,19 @@ public sealed class SiNanDbContext : DbContext
             entity.Property(e => e.AfterJson).HasMaxLength(65535);
             entity.Property(e => e.TraceId).HasMaxLength(128);
             entity.Property(e => e.CreatedAt).IsRequired();
+        });
+
+        modelBuilder.Entity<ConsoleUserEntity>(entity =>
+        {
+            entity.ToTable("console_users");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
+            entity.HasIndex(e => e.UserName).IsUnique();
+            entity.Property(e => e.UserName).HasMaxLength(128).IsRequired();
+            entity.Property(e => e.PasswordHash).HasMaxLength(512).IsRequired();
+            entity.Property(e => e.IsAdmin).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
         });
     }
 }

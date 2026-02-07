@@ -61,6 +61,11 @@ public sealed class ApiKeyAuthMiddleware
             return false;
         }
 
+        if (request.Path.StartsWithSegments("/api/v1/console-auth", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
         if (request.Path.StartsWithSegments("/api/v1/audit", StringComparison.OrdinalIgnoreCase))
         {
             return true;

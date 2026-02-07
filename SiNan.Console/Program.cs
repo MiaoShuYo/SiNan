@@ -1,10 +1,8 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.IdentityModel.Tokens;
-using SiNan.Console.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,13 +11,6 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddRazorPages();
-
-builder.Services.AddDbContext<ConsoleAuthDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("ConsoleDb")
-        ?? "Data Source=console-auth.db";
-    options.UseSqlite(connectionString);
-});
 
 var jwtSection = builder.Configuration.GetSection("Auth:Jwt");
 var jwtIssuer = jwtSection["Issuer"] ?? "SiNan.Console";
@@ -123,31 +114,6 @@ builder.Services.AddHttpClient("SiNanServer", client =>
 });
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ConsoleAuthDbContext>();
-    dbContext.Database.EnsureCreated();
-
-    if (!dbContext.Users.Any())
-    {
-        var bootstrapSection = builder.Configuration.GetSection("Auth:BootstrapAdmin");
-        var userName = bootstrapSection["UserName"] ?? "admin";
-        var password = bootstrapSection["Password"] ?? "ChangeMe123!";
-
-        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<AuthUser>();
-        var user = new AuthUser
-        {
-            UserName = userName,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        user.PasswordHash = hasher.HashPassword(user, password);
-
-        dbContext.Users.Add(user);
-        dbContext.SaveChanges();
-    }
-}
 
 var supportedCultures = new[] { "en-US", "zh-CN" };
 var localizationOptions = new RequestLocalizationOptions()
