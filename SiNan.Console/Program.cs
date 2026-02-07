@@ -17,6 +17,13 @@ builder.Services.AddHttpClient("SiNanServer", client =>
     var baseUrl = serviceEndpoint 
                   ?? builder.Configuration["SiNanServer:BaseUrl"] 
                   ?? "http://localhost:5043";
+
+    if (builder.Environment.IsDevelopment()
+        && baseUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+    {
+        // Prefer HTTP in development to avoid untrusted dev certificates.
+        baseUrl = "http://" + baseUrl["https://".Length..];
+    }
     
     client.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
     client.Timeout = TimeSpan.FromSeconds(30);
