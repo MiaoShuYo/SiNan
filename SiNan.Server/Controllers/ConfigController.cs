@@ -1,3 +1,8 @@
+/// <summary>
+/// Configuration management controller
+/// Handles configuration CRUD, versioning, rollback, history, and subscription operations
+/// </summary>
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -44,6 +49,13 @@ public class ConfigController : ControllerBase
         _quotaOptions = quotaOptions;
     }
 
+    /// <summary>
+    /// Create a new configuration item
+    /// Validates quota, creates config with version 1, and records history
+    /// </summary>
+    /// <param name="request">Configuration creation request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Created configuration item</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ConfigItemResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

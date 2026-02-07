@@ -1,3 +1,8 @@
+/// <summary>
+/// Audit log controller
+/// Provides admin-only access to query audit logs with filtering capabilities
+/// </summary>
+
 using Microsoft.AspNetCore.Mvc;
 using SiNan.Server.Auth;
 using SiNan.Server.Contracts.Audit;
@@ -22,6 +27,17 @@ public class AuditController : ControllerBase
         _authService = authService;
     }
 
+    /// <summary>
+    /// Query audit logs with optional filters
+    /// Requires admin privileges and audit.read permission
+    /// </summary>
+    /// <param name="take">Maximum number of records to return (1-500, default 100)</param>
+    /// <param name="action">Filter by action (optional)</param>
+    /// <param name="resource">Filter by resource (optional)</param>
+    /// <param name="from">Filter by start time (optional)</param>
+    /// <param name="to">Filter by end time (optional)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of audit log entries</returns>
     [HttpGet]
     [ProducesResponseType(typeof(List<AuditLogResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]

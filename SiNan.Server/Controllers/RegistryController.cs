@@ -1,3 +1,8 @@
+/// <summary>
+/// Service registry controller
+/// Handles service instance registration, deregistration, heartbeat, query, and subscription operations
+/// </summary>
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -44,6 +49,13 @@ public class RegistryController : ControllerBase
         _quotaOptions = quotaOptions;
     }
 
+    /// <summary>
+    /// Register a service instance
+    /// Creates a new service if it doesn't exist, then adds or updates the instance
+    /// </summary>
+    /// <param name="request">Registration request containing service and instance details</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Registration response with instance ID</returns>
     [HttpPost("register")]
     [ProducesResponseType(typeof(RegisterInstanceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -51,12 +63,14 @@ public class RegistryController : ControllerBase
         [FromBody] RegisterInstanceRequest request,
         CancellationToken cancellationToken)
     {
+        // Validate request parameters
         var errors = RegistryRequestValidator.Validate(request);
         if (errors.Count > 0)
         {
             return ErrorHelper.CreateError(HttpContext, ErrorCodes.ValidationFailed, "Invalid register request.", StatusCodes.Status400BadRequest, errors);
         }
 
+        // Check authorization
         var registerResource = $"registry:{request.Namespace}/{request.Group}/{request.ServiceName}/{request.Host}:{request.Port}";
         var authResult = _authService.AuthorizeAction(HttpContext, request.Namespace, request.Group, "registry.register", registerResource);
         if (!authResult.Allowed)
