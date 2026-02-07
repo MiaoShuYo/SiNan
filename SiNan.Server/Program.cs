@@ -93,8 +93,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// Enable HTTPS redirection
-app.UseHttpsRedirection();
+// Enable HTTPS redirection only outside development
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Add API key authentication middleware
 app.UseMiddleware<ApiKeyAuthMiddleware>();

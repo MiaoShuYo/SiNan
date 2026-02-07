@@ -2,6 +2,8 @@
 
 <div align="center">
 
+<img src="logo.svg" alt="SiNan Logo" width="200"/>
+
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
