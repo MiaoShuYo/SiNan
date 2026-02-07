@@ -1,17 +1,21 @@
-# Build
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY ../SiNan.ServiceDefaults/SiNan.ServiceDefaults.csproj ./SiNan.ServiceDefaults/
-COPY ./SiNan.Server.csproj ./SiNan.Server/
+# Copy project files for restore
+COPY ["SiNan.ServiceDefaults/SiNan.ServiceDefaults.csproj", "SiNan.ServiceDefaults/"]
+COPY ["SiNan.Server/SiNan.Server.csproj", "SiNan.Server/"]
 
-RUN dotnet restore ./SiNan.Server/SiNan.Server.csproj
+# Restore dependencies
+RUN dotnet restore "SiNan.Server/SiNan.Server.csproj"
 
-COPY ../SiNan.ServiceDefaults ./SiNan.ServiceDefaults/
-COPY . ./SiNan.Server/
+# Copy source code
+COPY SiNan.ServiceDefaults/ SiNan.ServiceDefaults/
+COPY SiNan.Server/ SiNan.Server/
 
+# Build and publish
 WORKDIR /src/SiNan.Server
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
