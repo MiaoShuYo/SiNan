@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.IdentityModel.Tokens;
 using SiNan.Console.Data;
 
@@ -82,6 +83,18 @@ builder.Services.AddAuthorization(options =>
 // Configure HttpClient with Aspire service discovery
 // When running through Aspire, "http://sinan-server" will be resolved automatically
 // When running standalone, use configured BaseUrl from appsettings.json
+var siNanTimeoutSeconds = builder.Configuration.GetValue<int?>("SiNanServer:TimeoutSeconds") ?? 30;
+var siNanTimeout = TimeSpan.FromSeconds(Math.Clamp(siNanTimeoutSeconds, 5, 300));
+var siNanAttemptTimeout = TimeSpan.FromSeconds(Math.Clamp(siNanTimeout.TotalSeconds / 2, 5, 150));
+var siNanSamplingDuration = TimeSpan.FromSeconds(Math.Max(30, siNanAttemptTimeout.TotalSeconds * 2));
+
+builder.Services.Configure<HttpStandardResilienceOptions>(options =>
+{
+    options.TotalRequestTimeout.Timeout = siNanTimeout;
+    options.AttemptTimeout.Timeout = siNanAttemptTimeout;
+    options.CircuitBreaker.SamplingDuration = siNanSamplingDuration;
+});
+
 builder.Services.AddHttpClient("SiNanServer", client =>
 {
     // Try to get service endpoint from Aspire service discovery first
@@ -100,7 +113,13 @@ builder.Services.AddHttpClient("SiNanServer", client =>
     }
     
     client.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
-    client.Timeout = TimeSpan.FromSeconds(30);
+    client.Timeout = siNanTimeout;
+})
+.AddStandardResilienceHandler(options =>
+{
+    options.TotalRequestTimeout.Timeout = siNanTimeout;
+    options.AttemptTimeout.Timeout = siNanAttemptTimeout;
+    options.CircuitBreaker.SamplingDuration = siNanSamplingDuration;
 });
 
 var app = builder.Build();

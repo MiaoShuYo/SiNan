@@ -87,6 +87,10 @@ public sealed class IndexModel : PageModel
             var data = await response.Content.ReadFromJsonAsync<List<AuditLogItem>>();
             Logs = data ?? new List<AuditLogItem>();
         }
+        catch (TaskCanceledException)
+        {
+            ErrorMessage = "请求超时: 无法在限定时间内连接到服务器。请确认 SiNan.Server 正在运行，并检查 SiNanServer:BaseUrl。";
+        }
         catch (HttpRequestException ex)
         {
             ErrorMessage = $"无法加载审计日志: {ex.Message}";

@@ -18,7 +18,7 @@ services:
       retries: 5
 
   sinan-server:
-    image: programercat/sina/server:latest
+    image: programercat/sina_server:latest
     container_name: sinan-server
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -36,7 +36,7 @@ services:
       retries: 5
 
   sinan-console:
-    image: programercat/sina/console:latest
+    image: programercat/sina_console:latest
     container_name: sinan-console
     environment:
       ASPNETCORE_ENVIRONMENT: Development
