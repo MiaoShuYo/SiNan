@@ -34,10 +34,10 @@ builder.Services.AddDbContext<SiNan.Server.Data.SiNanDbContext>(options =>
 });
 
 builder.Services
-    .AddScoped<SiNan.Server.Storage.IServiceRegistryRepository, SiNan.Server.Storage.EfServiceRegistryRepository>();
-builder.Services.AddScoped<SiNan.Server.Storage.IConfigRepository, SiNan.Server.Storage.EfConfigRepository>();
-builder.Services.AddScoped<SiNan.Server.Storage.IAuditLogRepository, SiNan.Server.Storage.EfAuditLogRepository>();
-builder.Services.AddScoped<SiNan.Server.Storage.IUnitOfWork, SiNan.Server.Storage.EfUnitOfWork>();
+    .AddScoped<IServiceRegistryRepository, EfServiceRegistryRepository>();
+builder.Services.AddScoped<IConfigRepository, EfConfigRepository>();
+builder.Services.AddScoped<IAuditLogRepository, EfAuditLogRepository>();
+builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<AuditLogWriter>();
 builder.Services.AddSingleton<RegistryChangeNotifier>();
 builder.Services.AddSingleton<ConfigChangeNotifier>();
