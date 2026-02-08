@@ -10,7 +10,5 @@
     <circle cx="128" cy="128" r="16" fill="#1A2236" stroke="#00D8FF" stroke-width="4"/>
     <!-- Decorative N -->
     <text x="128" y="48" text-anchor="middle" font-size="24" font-family="Segoe UI, Arial" fill="#00D8FF" font-weight="bold">N</text>
-    <!-- Project name -->
-    <text x="128" y="230" text-anchor="middle" font-size="28" font-family="Segoe UI, Arial" fill="#fff" font-weight="bold">SiNan</text>
   </g>
 </svg>
