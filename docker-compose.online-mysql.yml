@@ -9,11 +9,9 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       Data__Provider: MySql
-      ConnectionStrings__SiNan: "Server=mysql-server;Port=3306;Database=sinan;User=root;Password=root;"
+      ConnectionStrings__SiNan: "Server=${MYSQL_HOST:-ip};Port=${MYSQL_PORT:-3306};Database=${MYSQL_DB:-sinan};User=${MYSQL_USER:-root};Password=${MYSQL_PASSWORD};"
     ports:
       - "8080:8080"
-    networks:
-      - sinan-net
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 10s
@@ -38,8 +36,6 @@ services:
     depends_on:
       sinan-server:
         condition: service_healthy
-    networks:
-      - sinan-net
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 10s
@@ -48,7 +44,3 @@ services:
 
 volumes:
   console_data:
-
-networks:
-  sinan-net:
-    external: true

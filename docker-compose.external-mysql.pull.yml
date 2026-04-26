@@ -4,14 +4,14 @@ services:
   sinan-server:
     image: programercat/sina_server:latest
     container_name: sinan-server
-    external_links:
-      - mysql-server:mysql
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       Data__Provider: MySql
-      ConnectionStrings__SiNan: "Server=mysql;Port=3306;Database=sinan;User=root;Password=root;"
+      ConnectionStrings__SiNan: "Server=mysql-server;Port=3306;Database=sinan;User=root;Password=root;"
     ports:
       - "8080:8080"
+    networks:
+      - sinan-net
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 10s
@@ -34,6 +34,8 @@ services:
     depends_on:
       sinan-server:
         condition: service_healthy
+    networks:
+      - sinan-net
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 10s
@@ -42,3 +44,7 @@ services:
 
 volumes:
   console_data:
+
+networks:
+  sinan-net:
+    external: true
