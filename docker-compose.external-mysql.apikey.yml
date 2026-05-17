@@ -1,0 +1,79 @@
+version: "3.9"
+
+# External MySQL + API key authentication
+# Prerequisites:
+#   1. Copy .env.example to .env and fill in all values
+#   2. Create the external Docker network: docker network create sinan-net
+#   3. Ensure the external MySQL server is reachable from the sinan-net network
+# Usage:
+#   docker compose -f docker-compose.external-mysql.apikey.yml up -d
+
+services:
+  sinan-server:
+    build:
+      context: .
+      dockerfile: ./SiNan.Server/Dockerfile
+    container_name: sinan-server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Data__Provider: MySql
+      ConnectionStrings__SiNan: "Server=${MYSQL_HOST};Port=${MYSQL_PORT:-3306};Database=${MYSQL_DB:-sinan};User=${MYSQL_USER:-root};Password=${MYSQL_PASSWORD};"
+      # API key authentication
+      Auth__Enabled: "true"
+      # Admin key: IsAdmin=true, no restrictions (empty lists = allow all)
+      Auth__ApiKeys__0__Key: "${SINAN_ADMIN_KEY}"
+      Auth__ApiKeys__0__Actor: "admin"
+      Auth__ApiKeys__0__IsAdmin: "true"
+      # App key: restricted to default namespace / DEFAULT_GROUP, limited actions only
+      Auth__ApiKeys__1__Key: "${SINAN_APP_KEY}"
+      Auth__ApiKeys__1__Actor: "app"
+      Auth__ApiKeys__1__IsAdmin: "false"
+      Auth__ApiKeys__1__Namespaces__0: "default"
+      Auth__ApiKeys__1__Groups__0: "DEFAULT_GROUP"
+      Auth__ApiKeys__1__AllowedActions__0: "registry.register"
+      Auth__ApiKeys__1__AllowedActions__1: "registry.deregister"
+      Auth__ApiKeys__1__AllowedActions__2: "registry.heartbeat"
+      Auth__ApiKeys__1__AllowedActions__3: "registry.read"
+      Auth__ApiKeys__1__AllowedActions__4: "config.read"
+    ports:
+      - "8080:8080"
+    networks:
+      - sinan-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sinan-console:
+    build:
+      context: .
+      dockerfile: ./SiNan.Console/Dockerfile
+    container_name: sinan-console
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      SiNanServer__BaseUrl: "http://sinan-server:8080"
+      ConnectionStrings__ConsoleDb: "Data Source=/data/console-auth.db"
+      Auth__BootstrapAdmin__UserName: "${CONSOLE_ADMIN_USER:-admin}"
+      Auth__BootstrapAdmin__Password: "${CONSOLE_ADMIN_PASSWORD}"
+    ports:
+      - "5110:8080"
+    volumes:
+      - console_data:/data
+    depends_on:
+      sinan-server:
+        condition: service_healthy
+    networks:
+      - sinan-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  console_data:
+
+networks:
+  sinan-net:
+    external: true
