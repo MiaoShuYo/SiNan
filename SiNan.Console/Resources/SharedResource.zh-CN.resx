@@ -54,6 +54,12 @@
   <data name="Title.ConfigDetails" xml:space="preserve">
     <value>配置详情</value>
   </data>
+  <data name="Title.EditConfig" xml:space="preserve">
+    <value>编辑配置</value>
+  </data>
+  <data name="Title.ConfigHistory" xml:space="preserve">
+    <value>版本历史</value>
+  </data>
   <data name="Title.CreateConfig" xml:space="preserve">
     <value>新建配置</value>
   </data>
@@ -159,6 +165,18 @@
   <data name="CreateConfig.Subtitle" xml:space="preserve">
     <value>创建新的配置项并发布。</value>
   </data>
+  <data name="EditConfig.Eyebrow" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="EditConfig.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
+  <data name="ConfigHistory.Eyebrow" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="ConfigHistory.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
   <data name="Audit.Eyebrow" xml:space="preserve">
     <value>审计</value>
   </data>
@@ -186,11 +204,23 @@
   <data name="Action.BackToConfigs" xml:space="preserve">
     <value>返回配置列表</value>
   </data>
+  <data name="Action.EditConfig" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Action.ViewHistory" xml:space="preserve">
+    <value>历史版本</value>
+  </data>
+  <data name="Action.BackToDetails" xml:space="preserve">
+    <value>返回详情</value>
+  </data>
   <data name="Action.PublishUpdate" xml:space="preserve">
     <value>发布更新</value>
   </data>
   <data name="Action.DeleteConfig" xml:space="preserve">
     <value>删除配置</value>
+  </data>
+  <data name="Confirm.DeleteConfig" xml:space="preserve">
+    <value>确定要删除该配置吗？</value>
   </data>
   <data name="Action.Rollback" xml:space="preserve">
     <value>回滚</value>

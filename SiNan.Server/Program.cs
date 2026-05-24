@@ -81,9 +81,16 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<SiNanDbContext>();
     try
     {
-        // Apply pending migrations
-        dbContext.Database.Migrate();
-        app.Logger.LogInformation("Database migrations applied successfully.");
+        // Use Migrate() in Production; EnsureCreated() in Development/Testing (avoids provider-specific migration syntax)
+        if (app.Environment.IsProduction())
+        {
+            dbContext.Database.Migrate();
+        }
+        else
+        {
+            dbContext.Database.EnsureCreated();
+        }
+        app.Logger.LogInformation("Database schema applied successfully.");
 
         var bootstrapSection = builder.Configuration.GetSection("ConsoleAuth:BootstrapAdmin");
         var userName = bootstrapSection["UserName"] ?? "admin";

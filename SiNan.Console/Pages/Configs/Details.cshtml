@@ -10,7 +10,11 @@
         <h1>@Model.Key</h1>
         <p class="muted">@L["ConfigDetails.Meta", Model.Namespace, Model.Group]</p>
     </div>
-    <a class="btn btn-outline-secondary" asp-page="/Configs/Index">@L["Action.BackToConfigs"]</a>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary" asp-page="/Configs/Edit" asp-route-namespace="@Model.Namespace" asp-route-group="@Model.Group" asp-route-key="@Model.Key">@L["Action.EditConfig"]</a>
+        <a class="btn btn-outline-secondary" asp-page="/Configs/History" asp-route-namespace="@Model.Namespace" asp-route-group="@Model.Group" asp-route-key="@Model.Key">@L["Action.ViewHistory"]</a>
+        <a class="btn btn-outline-secondary" asp-page="/Configs/Index">@L["Action.BackToConfigs"]</a>
+    </div>
 </section>
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -45,80 +49,3 @@
         </div>
     </div>
 }
-
-<div class="panel">
-    <div class="panel-title">@L["Panel.EditPublish"]</div>
-    <form method="post" asp-page-handler="Update" class="config-form">
-        <input type="hidden" name="namespace" value="@Model.Namespace" />
-        <input type="hidden" name="group" value="@Model.Group" />
-        <input type="hidden" name="key" value="@Model.Key" />
-        <div class="form-grid">
-            <div>
-                <label class="form-label">@L["Label.Token"]</label>
-                <input class="form-control" name="token" value="@Model.Token" placeholder="X-SiNan-Token" />
-            </div>
-            <div>
-                <label class="form-label">@L["Label.PublishedBy"]</label>
-                <input class="form-control" name="publishedBy" value="@Model.PublishedBy" placeholder="operator" />
-            </div>
-            <div>
-                <label class="form-label">@L["Label.ContentType"]</label>
-                <input class="form-control" name="contentType" value="@Model.ContentType" placeholder="text/plain" />
-            </div>
-        </div>
-        <div>
-            <label class="form-label">@L["Label.Content"]</label>
-            <textarea class="form-control" name="content" rows="8">@Model.Content</textarea>
-        </div>
-        <div class="action-row">
-            <button class="btn btn-primary" type="submit">@L["Action.PublishUpdate"]</button>
-            <button class="btn btn-outline-danger" type="submit" formaction="?handler=Delete">@L["Action.DeleteConfig"]</button>
-        </div>
-    </form>
-</div>
-
-<div class="panel">
-    <div class="panel-title">@L["Panel.History"]</div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>@L["Table.Version"]</th>
-                    <th>@L["Table.PublishedAt"]</th>
-                    <th>@L["Table.PublishedBy"]</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-            @if (Model.History.Count == 0)
-            {
-                <tr>
-                    <td colspan="3" class="text-muted">@L["Empty.History"]</td>
-                </tr>
-            }
-            else
-            {
-                foreach (var item in Model.History)
-                {
-                    <tr>
-                        <td>@item.Version</td>
-                        <td>@item.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
-                        <td>@(item.PublishedBy ?? "-")</td>
-                        <td>
-                            <form method="post" asp-page-handler="Rollback" class="inline-form">
-                                <input type="hidden" name="namespace" value="@Model.Namespace" />
-                                <input type="hidden" name="group" value="@Model.Group" />
-                                <input type="hidden" name="key" value="@Model.Key" />
-                                <input type="hidden" name="version" value="@item.Version" />
-                                <input type="hidden" name="token" value="@Model.Token" />
-                                <input type="hidden" name="publishedBy" value="@Model.PublishedBy" />
-                                <button class="btn btn-sm btn-outline-primary" type="submit">@L["Action.Rollback"]</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            }
-            </tbody>
-        </table>
-    </div>
-</div>

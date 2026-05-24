@@ -36,20 +36,22 @@
             </div>
             <div>
                 <label class="form-label">@L["Label.ContentType"]</label>
-                <input class="form-control" name="contentType" value="@Model.ContentType" placeholder="text/plain" />
-            </div>
-            <div>
-                <label class="form-label">@L["Label.PublishedBy"]</label>
-                <input class="form-control" name="publishedBy" value="@Model.PublishedBy" placeholder="operator" />
-            </div>
-            <div>
-                <label class="form-label">@L["Label.Token"]</label>
-                <input class="form-control" name="token" value="@Model.Token" placeholder="X-SiNan-Token" />
+                <select class="form-control" name="contentType" data-content-type-select="create">
+                    @foreach (var ct in new[] { "TEXT", "JSON", "XML", "YAML", "HTML", "Properties", "TOML" })
+                    {
+                        <option value="@ct" selected="@(Model.ContentType == ct ? "selected" : null)">@ct</option>
+                    }
+                </select>
             </div>
         </div>
         <div>
             <label class="form-label">@L["Label.Content"]</label>
-            <textarea class="form-control" name="content" rows="10">@Model.Content</textarea>
+            <div class="content-editor-toolbar">
+                <button class="btn btn-sm btn-outline-secondary" data-content-format="create">Format</button>
+                <button class="btn btn-sm btn-outline-secondary" data-content-validate="create">Validate</button>
+                <span data-content-feedback="create" class="content-feedback"></span>
+            </div>
+            <textarea class="form-control" name="content" rows="10" data-content-editor="create">@Model.Content</textarea>
         </div>
         <button class="btn btn-primary" type="submit">@L["Action.CreatePublish"]</button>
     </form>

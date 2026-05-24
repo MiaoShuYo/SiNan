@@ -54,6 +54,12 @@
   <data name="Title.ConfigDetails" xml:space="preserve">
     <value>Config Details</value>
   </data>
+  <data name="Title.EditConfig" xml:space="preserve">
+    <value>Edit Config</value>
+  </data>
+  <data name="Title.ConfigHistory" xml:space="preserve">
+    <value>Version History</value>
+  </data>
   <data name="Title.CreateConfig" xml:space="preserve">
     <value>Create Config</value>
   </data>
@@ -159,6 +165,18 @@
   <data name="CreateConfig.Subtitle" xml:space="preserve">
     <value>Create a new config item and publish.</value>
   </data>
+  <data name="EditConfig.Eyebrow" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="EditConfig.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
+  <data name="ConfigHistory.Eyebrow" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="ConfigHistory.Meta" xml:space="preserve">
+    <value>Namespace: {0} / Group: {1}</value>
+  </data>
   <data name="Audit.Eyebrow" xml:space="preserve">
     <value>Audit</value>
   </data>
@@ -186,11 +204,23 @@
   <data name="Action.BackToConfigs" xml:space="preserve">
     <value>Back to configs</value>
   </data>
+  <data name="Action.EditConfig" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Action.ViewHistory" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Action.BackToDetails" xml:space="preserve">
+    <value>Back to details</value>
+  </data>
   <data name="Action.PublishUpdate" xml:space="preserve">
     <value>Publish update</value>
   </data>
   <data name="Action.DeleteConfig" xml:space="preserve">
     <value>Delete config</value>
+  </data>
+  <data name="Confirm.DeleteConfig" xml:space="preserve">
+    <value>Are you sure you want to delete this config?</value>
   </data>
   <data name="Action.Rollback" xml:space="preserve">
     <value>Rollback</value>

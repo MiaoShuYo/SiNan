@@ -26,16 +26,10 @@ public sealed class CreateModel : PageModel
     public string Key { get; set; } = string.Empty;
 
     [BindProperty]
-    public string Content { get; set; } = string.Empty;
+    public new string Content { get; set; } = string.Empty;
 
     [BindProperty]
-    public string ContentType { get; set; } = "text/plain";
-
-    [BindProperty]
-    public string? PublishedBy { get; set; }
-
-    [BindProperty]
-    public string? Token { get; set; }
+    public string ContentType { get; set; } = "TEXT";
 
     public string? ErrorMessage { get; private set; }
 
@@ -47,14 +41,12 @@ public sealed class CreateModel : PageModel
             return Page();
         }
 
+        var publishedBy = User.Identity?.Name;
+
         try
         {
             var client = _httpClientFactory.CreateClient("SiNanServer");
             using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/configs");
-            if (!string.IsNullOrWhiteSpace(Token))
-            {
-                request.Headers.TryAddWithoutValidation("X-SiNan-Token", Token);
-            }
 
             request.Content = JsonContent.Create(new
             {
@@ -63,7 +55,7 @@ public sealed class CreateModel : PageModel
                 Key,
                 Content,
                 ContentType,
-                PublishedBy
+                PublishedBy = publishedBy
             });
 
             var response = await client.SendAsync(request);
@@ -77,9 +69,7 @@ public sealed class CreateModel : PageModel
             {
                 @namespace = Namespace,
                 group = Group,
-                key = Key,
-                token = Token,
-                publishedBy = PublishedBy
+                key = Key
             });
         }
         catch (HttpRequestException ex)

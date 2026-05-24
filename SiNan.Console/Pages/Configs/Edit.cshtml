@@ -1,0 +1,53 @@
+@page
+@model SiNan.Console.Pages.Configs.EditModel
+@{
+    ViewData["Title"] = L["Title.EditConfig"];
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">@L["EditConfig.Eyebrow"]</p>
+        <h1>@Model.Key</h1>
+        <p class="muted">@L["EditConfig.Meta", Model.Namespace, Model.Group]</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-page="/Configs/Details" asp-route-namespace="@Model.Namespace" asp-route-group="@Model.Group" asp-route-key="@Model.Key">@L["Action.BackToDetails"]</a>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <div class="panel-title">@L["Panel.EditPublish"]</div>
+    <form method="post" asp-page-handler="Update" class="config-form">
+        <input type="hidden" name="namespace" value="@Model.Namespace" />
+        <input type="hidden" name="group" value="@Model.Group" />
+        <input type="hidden" name="key" value="@Model.Key" />
+        <div class="form-grid">
+            <div>
+                <label class="form-label">@L["Label.ContentType"]</label>
+                <select class="form-control" name="contentType" data-content-type-select="edit">
+                    @foreach (var ct in new[] { "TEXT", "JSON", "XML", "YAML", "HTML", "Properties", "TOML" })
+                    {
+                        <option value="@ct" selected="@(Model.ContentType == ct ? "selected" : null)">@ct</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div>
+            <label class="form-label">@L["Label.Content"]</label>
+            <div class="content-editor-toolbar">
+                <button class="btn btn-sm btn-outline-secondary" data-content-format="edit">Format</button>
+                <button class="btn btn-sm btn-outline-secondary" data-content-validate="edit">Validate</button>
+                <span data-content-feedback="edit" class="content-feedback"></span>
+            </div>
+            <textarea class="form-control" name="content" rows="12" data-content-editor="edit">@Model.Content</textarea>
+        </div>
+        <div class="action-row">
+            <button class="btn btn-primary" type="submit">@L["Action.PublishUpdate"]</button>
+            <button class="btn btn-outline-danger" type="submit" asp-page-handler="Delete"
+                    onclick="return confirm('@L["Confirm.DeleteConfig"]')">@L["Action.DeleteConfig"]</button>
+        </div>
+    </form>
+</div>

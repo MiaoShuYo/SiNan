@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using SiNan.Server.Data;
 
@@ -14,10 +16,15 @@ public sealed class SiNanWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
         builder.ConfigureServices(services =>
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<SiNanDbContext>));
-            if (descriptor is not null)
+            // Remove all DbContext-related registrations to avoid multiple EF Core provider conflict
+            var descriptors = services
+                .Where(d => d.ServiceType == typeof(DbContextOptions<SiNanDbContext>)
+                         || d.ServiceType == typeof(IDbContextOptionsConfiguration<SiNanDbContext>))
+                .ToList();
+            foreach (var descriptor in descriptors)
             {
                 services.Remove(descriptor);
             }
@@ -25,12 +32,9 @@ public sealed class SiNanWebApplicationFactory : WebApplicationFactory<Program>
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
-            services.AddDbContext<SiNanDbContext>(options => options.UseSqlite(_connection));
-
-            var serviceProvider = services.BuildServiceProvider();
-            using var scope = serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<SiNanDbContext>();
-            db.Database.EnsureCreated();
+            services.AddDbContext<SiNanDbContext>(options =>
+                options.UseSqlite(_connection)
+                       .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
         });
     }
 
