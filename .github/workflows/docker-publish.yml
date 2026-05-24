@@ -31,6 +31,8 @@ jobs:
           context: .
           file: SiNan.Server/Dockerfile
           push: true
+          provenance: false
+          sbom: false
           tags: |
             dockerhub.miaoshuhub.com/sinan/sinan_server:latest
             dockerhub.miaoshuhub.com/sinan/sinan_server:${{ github.run_number }}
@@ -43,6 +45,8 @@ jobs:
           context: .
           file: SiNan.Console/Dockerfile
           push: true
+          provenance: false
+          sbom: false
           tags: |
             dockerhub.miaoshuhub.com/sinan/sinan_console:latest
             dockerhub.miaoshuhub.com/sinan/sinan_console:${{ github.run_number }}
