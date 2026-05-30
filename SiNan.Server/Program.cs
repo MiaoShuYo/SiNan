@@ -5,6 +5,7 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using SiNan.Server.Audit;
 using SiNan.Server.Auth;
 using SiNan.Server.Config;
@@ -68,6 +69,10 @@ builder.Services.AddSingleton<ApiKeyAuthorizationService>();
 // Configure resource quota options
 builder.Services.Configure<QuotaOptions>(builder.Configuration.GetSection("Quota"));
 
+// Add a database connectivity health check so Docker/Compose can detect when DB is available
+builder.Services.AddHealthChecks()
+    .AddCheck<DbHealthCheck>("database", tags: ["db"]);
+
 // Add controller support
 builder.Services.AddControllers();
 // Add OpenAPI support (for API documentation generation)
@@ -116,8 +121,9 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        app.Logger.LogError(ex, "An error occurred while applying database migrations.");
-        throw;
+        app.Logger.LogError(ex, "An error occurred while applying database migrations. The server will start but remain unhealthy until the database is reachable.");
+        // Don't crash — let the health check report the degraded state.
+        // Docker/Compose healthcheck will retry until DB is available.
     }
 }
 
