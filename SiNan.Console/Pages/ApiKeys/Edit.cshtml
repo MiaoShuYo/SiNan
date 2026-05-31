@@ -1,0 +1,57 @@
+@page "{id:guid}"
+@model SiNan.Console.Pages.ApiKeys.EditModel
+@{
+    ViewData["Title"] = L["Title.EditApiKey"];
+}
+
+<section class="page-header">
+    <p class="eyebrow">@L["EditApiKey.Eyebrow"]</p>
+    <h1>@L["EditApiKey.Title"]</h1>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <form method="post" class="p-3">
+        <div class="mb-3">
+            <label class="form-label">@L["Label.ApiKey"]</label>
+            <input class="form-control" value="@Model.KeyMasked" readonly />
+            <small class="text-muted">密钥值不可修改</small>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.Actor"]</label>
+            <input class="form-control" asp-for="Actor" />
+        </div>
+        <div class="mb-3 form-check">
+            <input class="form-check-input" asp-for="IsAdmin" />
+            <label class="form-check-label" asp-for="IsAdmin">@L["Label.IsAdmin"]</label>
+        </div>
+        <div class="mb-3 form-check">
+            <input class="form-check-input" asp-for="Enabled" />
+            <label class="form-check-label" asp-for="Enabled">@L["Label.Enabled"]</label>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.Namespaces"]</label>
+            <input class="form-control" asp-for="Namespaces" placeholder="default, staging" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.Groups"]</label>
+            <input class="form-control" asp-for="Groups" placeholder="DEFAULT_GROUP, BILLING_GROUP" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.AllowedActions"]</label>
+            <input class="form-control" asp-for="AllowedActions" placeholder="config.read, registry.read" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.AllowedResources"]</label>
+            <input class="form-control" asp-for="AllowedResources" placeholder="config:, registry:" />
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">@L["Action.PublishUpdate"]</button>
+            <a class="btn btn-outline-secondary" asp-page="/ApiKeys/Index">@L["Action.BackToConfigs"]</a>
+        </div>
+    </form>
+</div>

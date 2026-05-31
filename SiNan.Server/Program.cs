@@ -47,6 +47,7 @@ builder.Services.AddDbContext<SiNanDbContext>(options =>
 builder.Services.AddScoped<IServiceRegistryRepository, EfServiceRegistryRepository>();
 builder.Services.AddScoped<IConfigRepository, EfConfigRepository>();
 builder.Services.AddScoped<IAuditLogRepository, EfAuditLogRepository>();
+builder.Services.AddScoped<IApiKeyRepository, EfApiKeyRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<AuditLogWriter>();
 
@@ -117,6 +118,33 @@ using (var scope = app.Services.CreateScope())
             user.PasswordHash = hasher.HashPassword(user, password);
             dbContext.ConsoleUsers.Add(user);
             dbContext.SaveChanges();
+        }
+
+        // Bootstrap admin API key if no keys exist in the database
+        var bootstrapKey = builder.Configuration["Auth:BootstrapAdminKey"];
+        if (!string.IsNullOrWhiteSpace(bootstrapKey) && !dbContext.ApiKeys.Any())
+        {
+            var adminKey = new ApiKeyEntity
+            {
+                Id = Guid.NewGuid(),
+                Key = bootstrapKey,
+                Actor = "admin",
+                IsAdmin = true,
+                NamespacesJson = "[]",
+                GroupsJson = "[]",
+                AllowedActionsJson = "[]",
+                AllowedResourcesJson = "[]",
+                Enabled = true,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+            dbContext.ApiKeys.Add(adminKey);
+            dbContext.SaveChanges();
+            app.Logger.LogInformation("Bootstrap admin API key created successfully.");
+        }
+        else if (string.IsNullOrWhiteSpace(bootstrapKey) && !dbContext.ApiKeys.Any())
+        {
+            app.Logger.LogWarning("No API keys exist in the database and Auth:BootstrapAdminKey is not configured. API authentication will reject all requests.");
         }
     }
     catch (Exception ex)

@@ -105,6 +105,12 @@ builder.Services.AddHttpClient("SiNanServer", client =>
     
     client.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
     client.Timeout = siNanTimeout;
+
+    var apiKey = builder.Configuration["SiNanServer:ApiKey"];
+    if (!string.IsNullOrWhiteSpace(apiKey))
+    {
+        client.DefaultRequestHeaders.TryAddWithoutValidation("X-SiNan-Token", apiKey);
+    }
 })
 .AddStandardResilienceHandler(options =>
 {

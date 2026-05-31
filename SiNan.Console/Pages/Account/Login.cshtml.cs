@@ -90,8 +90,9 @@ public class LoginModel : PageModel
 
         var loginResult = await response.Content.ReadFromJsonAsync<ConsoleAuthLoginResponse>();
         var userName = loginResult?.UserName ?? UserName;
+        var isAdmin = loginResult?.IsAdmin ?? false;
 
-        var token = CreateToken(userName);
+        var token = CreateToken(userName, isAdmin);
         var cookieName = _configuration["Auth:CookieName"] ?? "sinan_auth";
         var expiresMinutes = int.TryParse(_configuration["Auth:Jwt:ExpiresMinutes"], out var minutes)
             ? minutes
@@ -125,7 +126,7 @@ public class LoginModel : PageModel
         public bool IsAdmin { get; set; }
     }
 
-    private string CreateToken(string userName)
+    private string CreateToken(string userName, bool isAdmin)
     {
         var issuer = _configuration["Auth:Jwt:Issuer"] ?? "SiNan.Console";
         var audience = _configuration["Auth:Jwt:Audience"] ?? "SiNan.Console";
@@ -142,6 +143,7 @@ public class LoginModel : PageModel
         {
             new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(ClaimTypes.Name, userName),
+            new Claim("IsAdmin", isAdmin ? "true" : "false"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
         };
 

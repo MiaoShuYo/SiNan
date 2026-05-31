@@ -426,4 +426,85 @@
   <data name="Auth.InvalidCredentials" xml:space="preserve">
     <value>Invalid username or password.</value>
   </data>
+  <data name="Nav.Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Nav.ApiKeys" xml:space="preserve">
+    <value>API Keys</value>
+  </data>
+  <data name="Title.ApiKeys" xml:space="preserve">
+    <value>API Keys</value>
+  </data>
+  <data name="Title.CreateApiKey" xml:space="preserve">
+    <value>Create API Key</value>
+  </data>
+  <data name="Title.EditApiKey" xml:space="preserve">
+    <value>Edit API Key</value>
+  </data>
+  <data name="ApiKeys.Eyebrow" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ApiKeys.Title" xml:space="preserve">
+    <value>API Keys</value>
+  </data>
+  <data name="ApiKeys.Subtitle" xml:space="preserve">
+    <value>Manage API keys for server-to-server authentication.</value>
+  </data>
+  <data name="Action.CreateApiKey" xml:space="preserve">
+    <value>New API Key</value>
+  </data>
+  <data name="Action.EditApiKey" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Action.DeleteApiKey" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="CreateApiKey.Eyebrow" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="CreateApiKey.Title" xml:space="preserve">
+    <value>Create API Key</value>
+  </data>
+  <data name="CreateApiKey.Subtitle" xml:space="preserve">
+    <value>Save the key now — it won't be shown again.</value>
+  </data>
+  <data name="EditApiKey.Eyebrow" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="EditApiKey.Title" xml:space="preserve">
+    <value>Edit API Key</value>
+  </data>
+  <data name="Label.ApiKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="Label.Actor" xml:space="preserve">
+    <value>Actor</value>
+  </data>
+  <data name="Label.IsAdmin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Label.Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Label.Namespaces" xml:space="preserve">
+    <value>Namespaces (comma-separated, empty = all)</value>
+  </data>
+  <data name="Label.Groups" xml:space="preserve">
+    <value>Groups (comma-separated, empty = all)</value>
+  </data>
+  <data name="Label.AllowedActions" xml:space="preserve">
+    <value>Allowed Actions (comma-separated, empty = all)</value>
+  </data>
+  <data name="Label.AllowedResources" xml:space="preserve">
+    <value>Allowed Resources (comma-separated, empty = all)</value>
+  </data>
+  <data name="Empty.ApiKeys" xml:space="preserve">
+    <value>No API keys</value>
+  </data>
+  <data name="Confirm.DeleteApiKey" xml:space="preserve">
+    <value>Are you sure you want to delete this API key?</value>
+  </data>
+  <data name="Table.CreatedAt" xml:space="preserve">
+    <value>Created</value>
+  </data>
 </root>

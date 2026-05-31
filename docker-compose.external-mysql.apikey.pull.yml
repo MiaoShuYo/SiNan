@@ -16,21 +16,7 @@ services:
       ConnectionStrings__SiNan: "Server=${MYSQL_HOST};Port=${MYSQL_PORT:-3306};Database=${MYSQL_DB:-sinan};User=${MYSQL_USER:-root};Password=${MYSQL_PASSWORD};"
       # API key authentication
       Auth__Enabled: "true"
-      # Admin key: IsAdmin=true, no restrictions (empty lists = allow all)
-      Auth__ApiKeys__0__Key: "${SINAN_ADMIN_KEY}"
-      Auth__ApiKeys__0__Actor: "admin"
-      Auth__ApiKeys__0__IsAdmin: "true"
-      # App key: restricted to default namespace / DEFAULT_GROUP, limited actions only
-      Auth__ApiKeys__1__Key: "${SINAN_APP_KEY}"
-      Auth__ApiKeys__1__Actor: "app"
-      Auth__ApiKeys__1__IsAdmin: "false"
-      Auth__ApiKeys__1__Namespaces__0: "default"
-      Auth__ApiKeys__1__Groups__0: "DEFAULT_GROUP"
-      Auth__ApiKeys__1__AllowedActions__0: "registry.register"
-      Auth__ApiKeys__1__AllowedActions__1: "registry.deregister"
-      Auth__ApiKeys__1__AllowedActions__2: "registry.heartbeat"
-      Auth__ApiKeys__1__AllowedActions__3: "registry.read"
-      Auth__ApiKeys__1__AllowedActions__4: "config.read"
+      Auth__BootstrapAdminKey: "${SINAN_ADMIN_KEY}"
     ports:
       - "8080:8080"
     networks:
@@ -50,6 +36,7 @@ services:
       ConnectionStrings__ConsoleDb: "Data Source=/data/console-auth.db"
       Auth__BootstrapAdmin__UserName: "${CONSOLE_ADMIN_USER:-admin}"
       Auth__BootstrapAdmin__Password: "${CONSOLE_ADMIN_PASSWORD}"
+      SiNanServer__ApiKey: "${SINAN_ADMIN_KEY}"
     ports:
       - "5110:8080"
     volumes:

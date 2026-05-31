@@ -15,6 +15,7 @@ public sealed class SiNanDbContext : DbContext
     public DbSet<ConfigHistoryEntity> ConfigHistory => Set<ConfigHistoryEntity>();
     public DbSet<AuditLogEntity> AuditLogs => Set<AuditLogEntity>();
     public DbSet<ConsoleUserEntity> ConsoleUsers => Set<ConsoleUserEntity>();
+    public DbSet<ApiKeyEntity> ApiKeys => Set<ApiKeyEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -115,6 +116,24 @@ public sealed class SiNanDbContext : DbContext
             entity.Property(e => e.UserName).HasMaxLength(128).IsRequired();
             entity.Property(e => e.PasswordHash).HasMaxLength(512).IsRequired();
             entity.Property(e => e.IsAdmin).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+        });
+
+        modelBuilder.Entity<ApiKeyEntity>(entity =>
+        {
+            entity.ToTable("api_keys");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnType("char(36)");
+            entity.HasIndex(e => e.Key).IsUnique();
+            entity.Property(e => e.Key).HasMaxLength(256).IsRequired();
+            entity.Property(e => e.Actor).HasMaxLength(128).IsRequired();
+            entity.Property(e => e.IsAdmin).HasDefaultValue(false);
+            entity.Property(e => e.Enabled).HasDefaultValue(true);
+            entity.Property(e => e.NamespacesJson).HasMaxLength(8192);
+            entity.Property(e => e.GroupsJson).HasMaxLength(8192);
+            entity.Property(e => e.AllowedActionsJson).HasMaxLength(8192);
+            entity.Property(e => e.AllowedResourcesJson).HasMaxLength(8192);
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt).IsRequired();
         });

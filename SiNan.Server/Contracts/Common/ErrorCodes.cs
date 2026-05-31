@@ -11,4 +11,7 @@ public static class ErrorCodes
     public const string QuotaExceeded = "quota_exceeded";
     public const string Unauthorized = "unauthorized";
     public const string Forbidden = "forbidden";
+    public const string ApiKeyNotFound = "apikey_not_found";
+    public const string ApiKeyAlreadyExists = "apikey_already_exists";
+    public const string CannotDeleteLastAdminKey = "cannot_delete_last_admin_key";
 }

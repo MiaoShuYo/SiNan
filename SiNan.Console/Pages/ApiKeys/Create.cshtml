@@ -1,0 +1,53 @@
+@page
+@model SiNan.Console.Pages.ApiKeys.CreateModel
+@{
+    ViewData["Title"] = L["Title.CreateApiKey"];
+}
+
+<section class="page-header">
+    <p class="eyebrow">@L["CreateApiKey.Eyebrow"]</p>
+    <h1>@L["CreateApiKey.Title"]</h1>
+    <p class="muted">@L["CreateApiKey.Subtitle"]</p>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <form method="post" class="p-3">
+        <div class="mb-3">
+            <label class="form-label">@L["Label.ApiKey"]</label>
+            <input class="form-control" asp-for="Key" placeholder="至少8个字符" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.Actor"]</label>
+            <input class="form-control" asp-for="Actor" placeholder="e.g. admin, billing-service" />
+        </div>
+        <div class="mb-3 form-check">
+            <input class="form-check-input" asp-for="IsAdmin" />
+            <label class="form-check-label" asp-for="IsAdmin">@L["Label.IsAdmin"]</label>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.Namespaces"]</label>
+            <input class="form-control" asp-for="Namespaces" placeholder="default, staging" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.Groups"]</label>
+            <input class="form-control" asp-for="Groups" placeholder="DEFAULT_GROUP, BILLING_GROUP" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.AllowedActions"]</label>
+            <input class="form-control" asp-for="AllowedActions" placeholder="config.read, registry.read" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@L["Label.AllowedResources"]</label>
+            <input class="form-control" asp-for="AllowedResources" placeholder="config:, registry:" />
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">@L["Action.CreatePublish"]</button>
+            <a class="btn btn-outline-secondary" asp-page="/ApiKeys/Index">@L["Action.BackToConfigs"]</a>
+        </div>
+    </form>
+</div>

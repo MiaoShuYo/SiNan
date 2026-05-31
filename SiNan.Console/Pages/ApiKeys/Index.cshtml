@@ -1,0 +1,84 @@
+@page
+@model SiNan.Console.Pages.ApiKeys.IndexModel
+@{
+    ViewData["Title"] = L["Title.ApiKeys"];
+}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">@L["ApiKeys.Eyebrow"]</p>
+        <h1>@L["ApiKeys.Title"]</h1>
+        <p class="muted">@L["ApiKeys.Subtitle"]</p>
+    </div>
+    <div>
+        <a class="btn btn-outline-primary" asp-page="/ApiKeys/Create">@L["Action.CreateApiKey"]</a>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+<div class="panel">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>@L["Label.ApiKey"]</th>
+                    <th>@L["Label.Actor"]</th>
+                    <th>@L["Label.IsAdmin"]</th>
+                    <th>@L["Label.Enabled"]</th>
+                    <th>@L["Table.CreatedAt"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.ApiKeys.Count == 0)
+            {
+                <tr>
+                    <td colspan="6" class="text-muted">@L["Empty.ApiKeys"]</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.ApiKeys)
+                {
+                    <tr>
+                        <td><code>@item.KeyMasked</code></td>
+                        <td>@item.Actor</td>
+                        <td>
+                            @if (item.IsAdmin)
+                            {
+                                <span class="badge text-bg-success">Admin</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">—</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.Enabled)
+                            {
+                                <span class="badge text-bg-success">@L["Value.Healthy"]</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-warning">Disabled</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/ApiKeys/Edit" asp-route-id="@item.Id">@L["Action.EditApiKey"]</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" class="d-inline"
+                                  onsubmit="return confirm('@L["Confirm.DeleteApiKey"]')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">@L["Action.DeleteApiKey"]</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

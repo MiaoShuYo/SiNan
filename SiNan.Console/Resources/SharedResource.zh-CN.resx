@@ -426,4 +426,85 @@
   <data name="Auth.InvalidCredentials" xml:space="preserve">
     <value>用户名或密码错误。</value>
   </data>
+  <data name="Nav.Settings" xml:space="preserve">
+    <value>系统设置</value>
+  </data>
+  <data name="Nav.ApiKeys" xml:space="preserve">
+    <value>API 密钥</value>
+  </data>
+  <data name="Title.ApiKeys" xml:space="preserve">
+    <value>API 密钥</value>
+  </data>
+  <data name="Title.CreateApiKey" xml:space="preserve">
+    <value>创建 API 密钥</value>
+  </data>
+  <data name="Title.EditApiKey" xml:space="preserve">
+    <value>编辑 API 密钥</value>
+  </data>
+  <data name="ApiKeys.Eyebrow" xml:space="preserve">
+    <value>系统设置</value>
+  </data>
+  <data name="ApiKeys.Title" xml:space="preserve">
+    <value>API 密钥管理</value>
+  </data>
+  <data name="ApiKeys.Subtitle" xml:space="preserve">
+    <value>管理服务间认证的 API 密钥。</value>
+  </data>
+  <data name="Action.CreateApiKey" xml:space="preserve">
+    <value>新建密钥</value>
+  </data>
+  <data name="Action.EditApiKey" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Action.DeleteApiKey" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="CreateApiKey.Eyebrow" xml:space="preserve">
+    <value>系统设置</value>
+  </data>
+  <data name="CreateApiKey.Title" xml:space="preserve">
+    <value>创建 API 密钥</value>
+  </data>
+  <data name="CreateApiKey.Subtitle" xml:space="preserve">
+    <value>密钥创建后仅显示一次，请立即保存。</value>
+  </data>
+  <data name="EditApiKey.Eyebrow" xml:space="preserve">
+    <value>系统设置</value>
+  </data>
+  <data name="EditApiKey.Title" xml:space="preserve">
+    <value>编辑 API 密钥</value>
+  </data>
+  <data name="Label.ApiKey" xml:space="preserve">
+    <value>密钥</value>
+  </data>
+  <data name="Label.Actor" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Label.IsAdmin" xml:space="preserve">
+    <value>管理员</value>
+  </data>
+  <data name="Label.Enabled" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="Label.Namespaces" xml:space="preserve">
+    <value>命名空间（逗号分隔，空=全部）</value>
+  </data>
+  <data name="Label.Groups" xml:space="preserve">
+    <value>分组（逗号分隔，空=全部）</value>
+  </data>
+  <data name="Label.AllowedActions" xml:space="preserve">
+    <value>允许操作（逗号分隔，空=全部）</value>
+  </data>
+  <data name="Label.AllowedResources" xml:space="preserve">
+    <value>允许资源（逗号分隔，空=全部）</value>
+  </data>
+  <data name="Empty.ApiKeys" xml:space="preserve">
+    <value>暂无 API 密钥</value>
+  </data>
+  <data name="Confirm.DeleteApiKey" xml:space="preserve">
+    <value>确定要删除此 API 密钥吗？</value>
+  </data>
+  <data name="Table.CreatedAt" xml:space="preserve">
+    <value>创建时间</value>
+  </data>
 </root>
